@@ -187,10 +187,9 @@ class Game {
         this.sounds = {}; // place to keep sounds
         this.fonts = {}; // place to keep fonts
 
-        this.lanes = []; // lanes
         this.effects = []; // effects
-        this.entities = []; // entities (buttons, powerups)
-        this.player = {}; // player
+        this.entities = []; // entities
+        this.goals = [] // goals
 
         // set topbar and topbar color
         this.topbar.active = this.config.settings.gameTopBar;
@@ -227,8 +226,6 @@ class Game {
 
         // make a list of assets
         const gameAssets = [
-            loadImage('playerImage', this.config.images.playerImage),
-            loadImage('button1', this.config.buttons.button1),
             loadImage('backgroundImage', this.config.images.backgroundImage),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadSound('powerUpSound', this.config.sounds.powerUpSound),
@@ -347,6 +344,16 @@ class Game {
                 }
             }
 
+
+            // update and draw buttons
+            for (let i = 0; i < this.entities.length; i++) {
+                const button = this.entities[i];
+
+                button.move(0, 1, this.frame.scale);
+                button.draw();
+                
+            }
+
             // update and draw effects
             for (let i = 0; i < this.effects.length; i++) {
                 let effect = this.effects[i];
@@ -359,120 +366,6 @@ class Game {
                     this.effects.splice(i, 1);
                 }
                 
-            }
-
-            for (let i = 0; i < this.entities.length; i++) {
-                let entity = this.entities[i];
-
-                entity.move(0, 1, this.frame.scale);
-                entity.draw();
-
-                // check for player collisions
-                if (entity.lane === this.state.playerLane && collideDistance(entity, this.player)) {
-                    // handle collision
-
-                    // decrement life
-                    this.decrementLife();
-
-                    // let collisionLocation = 0;
-                    // burst effect
-                    let burst = this.throttledBurst({
-                        ctx: this.ctx,
-                        n: 50,
-                        x: this.player.cx,
-                        y: this.player.cy,
-                        vx: [-50, 50],
-                        vy: [-5, 50],
-                        burnRate: 0.1
-                    });
-
-                    burst && this.effects.push(burst);
-
-                    // blast effect
-                    let blastWave = this.throttledBlastWave({
-                        ctx: this.ctx,
-                        x: this.player.cx,
-                        y: this.player.cy
-                    });
-
-                    if (blastWave) {
-                      this.effects.push(blastWave);
-
-                        this.sounds.hitSound.currentTime = 0;
-                        this.sounds.hitSound.play();
-                    }
-                }
-
-                // remove in-active entity
-                if (entity.y > this.canvas.height) {
-                    this.entities.splice(i, 1);
-
-                    // add points
-                    // increase game speed
-                    /*
-                    this.setState({
-                        score: Math.floor(this.state.score + (this.state.gameSpeed / 20)),
-                        gameSpeed: this.state.gameSpeed + 0.01 
-                    });
-                    */
-                    this.setState({
-                        score: Math.floor(this.state.score + (this.state.gameSpeed / 20))
-                    });
-                }
-                
-            }
-
-
-            // check for game over
-            if (this.state.lives < 1) {
-                // big explosion
-                this.effects.push(
-                    new BlastWave({
-                        ctx: this.ctx,
-                        x: this.player.cx,
-                        y: this.player.cy,
-                        width: 300,
-                        hue: 360,
-                        burnRate: [200, 300]
-                    }),
-                    new BlastWave({
-                        ctx: this.ctx,
-                        x: this.player.cx,
-                        y: this.player.cy,
-                        width: 150,
-                        burnRate: [100, 200]
-                    }),
-                    new BlastWave({
-                        ctx: this.ctx,
-                        x: this.player.cx,
-                        y: this.player.cy,
-                        width: 20,
-                        burnRate: [50, 100]
-                    }),
-                    new Burst({
-                        ctx: this.ctx,
-                        n: 100,
-                        x: this.player.cx,
-                        y: this.player.cy,
-                        vx: [-50, 50],
-                        vy: [-5, 5],
-                        burnRate: 0.05
-                    }),
-                    new Burst({
-                        ctx: this.ctx,
-                        n: 25,
-                        x: this.player.cx,
-                        y: this.player.cy,
-                        vx: [-6, 6],
-                        vy: [-60, 60],
-                        burnRate: 0.025
-                    })
-                );
-
-                this.sounds.gameOverSound.play();
-
-                // game over
-                this.setState({ current: 'over' });
             }
 
         }
@@ -505,26 +398,6 @@ class Game {
         this.requestFrame(() => this.play());
     }
 
-    shiftRight() {
-        // right
-        this.setState({
-            playerLane: Math.min(this.state.playerLane + 1, this.state.lanes - 1)
-        });
-
-        this.sounds.turnSound.currentTime = 0;
-        this.sounds.turnSound.play();
-    }
-
-    shiftLeft() {
-        // left
-        this.setState({
-            playerLane: Math.max(this.state.playerLane - 1, 0)
-        });
-
-        this.sounds.turnSound.currentTime = 0;
-        this.sounds.turnSound.play();
-    }
-
     // event listeners
     handleClicks(e) {
         if (this.state.current === 'loading') { return; }
@@ -555,7 +428,7 @@ class Game {
         console.log('----- snapshot -----');
         console.log(this.effects);
         console.log(this.entities);
-        console.log(this.player);
+        console.log(this.goals);
         */
     }
 
@@ -600,20 +473,7 @@ class Game {
     }
 
     handleTap(e) {
-        // ignore for first 1 second
-        if (this.frame.count < 60) { return; }
-
-        // shift right for right of player taps
-        // shift left for left of player taps
-        let location = canvasInputPosition(this.canvas, e.touches[0]);
-
-        if (location.x > this.player.x) {
-            this.shiftRight();
-        }
-
-        if (location.x < this.player.x) {
-            this.shiftLeft();
-        }
+        // let location = canvasInputPosition(this.canvas, e.touches[0]);
     }
 
     handleResize() {
