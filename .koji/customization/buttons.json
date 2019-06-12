@@ -1,0 +1,70 @@
+{
+  "buttons": {
+    "button1Image": "https://i.imgur.com/FYUa8v9.png",
+    "button1Key": "Digit1",
+    "button2Image": "https://i.imgur.com/II3Lyp5.png",
+    "button2Key": "Digit2",
+    "button3Image": "https://i.imgur.com/mWjjAIT.png",
+    "button3Key": "Digit3",
+    "button4Image": "https://i.imgur.com/IL9cQOS.png",
+    "button4Key": "Digit4"
+  },
+  "@@editor": [
+    {
+      "key": "buttons",
+      "name": "Buttons",
+      "icon": "🖼️",
+      "source": "buttons.json",
+      "fields": [
+        {
+          "key": "button1Image",
+          "name": "Button 1 Image",
+          "description": "Button 1 image",
+          "type": "image"
+        },
+        {
+          "key": "button1Key",
+          "name": "Button 1 Key",
+          "description": "Button 1 key",
+          "type": "text"
+        },
+        {
+          "key": "button2Image",
+          "name": "Button 2 Image",
+          "description": "Button 2 image",
+          "type": "image"
+        },
+        {
+          "key": "button2Key",
+          "name": "Button 2 Key",
+          "description": "Button 2 key",
+          "type": "text"
+        },
+        {
+          "key": "button3Image",
+          "name": "Button 3 Image",
+          "description": "Button 3 image",
+          "type": "image"
+        },
+        {
+          "key": "button3Key",
+          "name": "Button 3 Key",
+          "description": "Button 3 key",
+          "type": "text"
+        },
+        {
+          "key": "button4Image",
+          "name": "Button 4 Image",
+          "description": "Button 4 image",
+          "type": "image"
+        },
+        {
+          "key": "button4Key",
+          "name": "Button 4 Key",
+          "description": "Button 4 key",
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}

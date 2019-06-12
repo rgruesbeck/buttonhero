@@ -55,3 +55,4 @@ If you need any help, you can ask the community by [making a post](https://gokoj
 ### Helpful Resources
 - [Mozilla Game Development Docs](https://developer.mozilla.org/en-US/docs/Games).
 - [HTML5 Game Devs Forum](http://www.html5gamedevs.com/).
+- [Canvas Cheat Sheet](http://cheatsheetworld.com/programming/html5-canvas-cheat-sheet/).

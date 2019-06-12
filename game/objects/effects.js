@@ -17,6 +17,19 @@ import {
     valueOrRange
 } from '../utils/baseUtils.js';
 
+const imageParticleEmmiter = ({ n = 1 }) => {
+    return Array.apply(null, { length: n })
+    .map(() => { return {
+        x: valueOrRange(x),
+        y: valueOrRange(y),
+        vx: valueOrRange(vx),
+        vy: valueOrRange(vy),
+        r: valueOrRange(1),
+        alpha: valueOrRange(alpha),
+        scale: 1
+    }; });
+}
+
 const praticleEmitter = ({ n = 1, x = 0, y = 0, vx = 1, vy = 1, rd = 2, hue = 0, alpha = 1 }) => {
     return Array.apply(null, { length: n })
     .map(() => { return {
@@ -47,6 +60,13 @@ const drawParticle = (ctx, p) => {
     ctx.arc(p.x >> 0, p.y >> 0, p.rd >> 0, 0, 2 * Math.PI, false);
     ctx.fillStyle = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`;
     ctx.fill();
+}
+
+const drawImageParticle = (ctx, image, p) => {
+    // https://stackoverflow.com/questions/17411991/html5-canvas-rotate-image
+    ctx.setTransform(p.scale, 0, 0, p.scale, 0, 0); // sets scales and origin
+    ctx.rotate(p.r);
+    ctx.drawImage(image, -image.width / 2, -image.height / 2);
 }
 
 const drawWave = (ctx, w) => {
@@ -172,6 +192,54 @@ function Burst({ ctx, n = 10, x, y, vx, vy, burnRate }) {
 function BlastWave({ ctx, x, y, width = 50, hue = [300, 350], burnRate = 100 }) {
     this.id = Math.random().toString(16).slice(2);
     this.type = 'blast-wave';
+    this.active = true;
+    this.ctx = ctx;
+    this.center = { x, y };
+    this.burnRate = (Array.isArray(burnRate) ? randomBetween(burnRate[0], burnRate[1]) : burnRate) / 100;
+    this.waves = radialWaveEmitter({
+        x: x,
+        y: y,
+        rd: 25,
+        width: width,
+        hue: hue,
+        alpha: 1
+    })
+
+    this.tick = () => {
+        // only tick if active
+        if (!this.active) { return; }
+
+        // flag as in-active when no more waves
+        if (this.waves.length === 0) {
+            this.active = false;
+            return;
+        }
+
+        // loop through waves 
+        for (let i = 0; i < this.waves.length; i++) {
+            let wave = this.waves[i];
+
+            // draw waves
+            wave.rd += this.burnRate * 8;
+            wave.width -= this.burnRate / 2;
+            wave.hue -= this.burnRate;
+            wave.alpha -= this.burnRate * 0.0075;
+
+            // remove wave when larger than blast radius
+            if (wave.width < 1) {
+                this.waves.splice(i, 1);
+            }
+
+            // draw wave
+            drawWave(this.ctx, wave);
+        }
+
+    }
+}
+
+function Pond({ ctx, x, y, width = 50, hue = [300, 350], burnRate = 100 }) {
+    this.id = Math.random().toString(16).slice(2);
+    this.type = 'pond';
     this.active = true;
     this.ctx = ctx;
     this.center = { x, y };

@@ -38,6 +38,11 @@ const valueOrRange = (vr) => {
     return Array.isArray(vr) ? randomBetween(vr[0], vr[1], true) : vr;
 }
 
+const randomProperty = (obj) => {
+    let keys = Object.keys(obj);
+    return obj[keys[ keys.length * Math.random() << 0]];
+}
+
 // apply a lower and upper bound to a number
 const bounded = (n, min, max) => {
     return [n]
@@ -134,6 +139,7 @@ export {
     findIn,
     hexToRgbA,
     randomBetween,
+    randomProperty,
     valueOrRange,
     hashCode,
     throttled

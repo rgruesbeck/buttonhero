@@ -37,6 +37,7 @@ import {
 import {
     hashCode,
     randomBetween,
+    randomProperty,
     throttled
 } from './utils/baseUtils.js';
 
@@ -55,11 +56,9 @@ import {
 import {
     Burst,
     BlastWave,
-    StarStream
 } from './objects/effects.js';
 
-import Player from './characters/player.js';
-import Obstacle from './characters/obstacle.js';
+import Button from './characters/button.js';
 import { collideDistance } from './utils/spriteUtils.js';
 
 class Game {
@@ -123,13 +122,53 @@ class Game {
             scale: null
         };
 
+        // create neat place to keep buttons
+        this.buttons = this.config['@@editor']
+            .find(c => c.key === 'buttons').fields
+            .map(f => {
+                return {
+                    key: f.key,
+                    value: this.config.buttons[f.key],
+                    type: f.type
+                }
+            })
+            .reduce((acc, cur, idx) => {
+                let key = cur.key.replace(/Key|Image/, '');
+
+                // allocate key
+                if (acc[key] === undefined) { acc[key] = {}; }
+
+                // set keycode
+                if (cur.type === 'text') {
+                    acc[key].keycode = {
+                        key: cur.key,
+                        value: cur.value
+                    };
+                }
+
+                // set image
+                if (cur.type === 'image') {
+                    acc[key].image = {
+                        key: cur.key,
+                        value: cur.value
+                    };
+
+                }
+
+                // set lanes
+                acc[key].lane = Object.keys(acc).length - 1; 
+
+                return acc;
+            }, {});
+
+        let lanes = Object.keys(this.buttons).length;
+
         // game settings
         this.state = {
             current: 'loading',
             prev: '',
-            lanes: parseInt(this.config.settings.lanes),
-            playerLane: parseInt(this.config.settings.lanes) /  2 >> 0,
-            laneSize: Math.floor(this.canvas.width / parseInt(this.config.settings.lanes)),
+            lanes: lanes,
+            laneSize: Math.floor(this.canvas.width / lanes),
             gameSpeed: parseInt(this.config.settings.gameSpeed),
             score: 0,
             lives: parseInt(this.config.settings.lives),
@@ -150,7 +189,7 @@ class Game {
 
         this.lanes = []; // lanes
         this.effects = []; // effects
-        this.entities = []; // entities (obstacles, powerups)
+        this.entities = []; // entities (buttons, powerups)
         this.player = {}; // player
 
         // set topbar and topbar color
@@ -170,6 +209,7 @@ class Game {
             scale: ((this.canvas.width + this.canvas.height) / 2) * 0.003
         };
 
+
         // set document body to backgroundColor
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
 
@@ -188,7 +228,7 @@ class Game {
         // make a list of assets
         const gameAssets = [
             loadImage('playerImage', this.config.images.playerImage),
-            loadImage('obstacleImage', this.config.images.obstacleImage),
+            loadImage('button1', this.config.buttons.button1),
             loadImage('backgroundImage', this.config.images.backgroundImage),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadSound('powerUpSound', this.config.sounds.powerUpSound),
@@ -198,8 +238,13 @@ class Game {
             loadFont('gameFont', this.config.settings.fontFamily)
         ];
 
+        // make a list of button image assets
+        const buttonImages = Object.entries(this.buttons)
+        .map(entry => entry[1])
+        .map(button => loadImage(button.image.key, button.image.value));
+
         // put the loaded assets the respective containers
-        loadList(gameAssets)
+        loadList([...gameAssets, ...buttonImages])
         .then((assets) => {
 
             this.images = assets.image;
@@ -211,23 +256,6 @@ class Game {
 
     create() {
         // create game characters
-
-        const { top } = this.screen;
-        const { playerImage } = this.images;
-
-        let playerSize = resize({ image: playerImage, width: this.state.laneSize });
-
-        this.player = new Player({
-            ctx: this.ctx,
-            image: playerImage,
-            x: this.state.playerLane * this.state.laneSize,
-            y: top,
-            width: playerSize.width,
-            height: playerSize.height,
-            speed: 70,
-            bounds: this.screen
-        });
-
 
         // set overlay styles
         this.overlay.setStyles({...this.config.colors, ...this.config.settings});
@@ -284,30 +312,16 @@ class Game {
             if (this.state.prev === 'ready') {
                 this.overlay.hide(['banner', 'button', 'instructions'])
 
-                // start star stream
-                this.effects.push(new StarStream({
-                    ctx: this.ctx,
-                    n: 200,
-                    x: [0, this.canvas.width],
-                    y: 0,
-                    vx: 0,
-                    vy: this.state.gameSpeed, // game background speed
-                    rd: [2, 7],
-                    hue: [0, 70]
-                }))
-
-                // power up sound
-                this.sounds.powerUpSound.play();
                 this.setState({ current: 'play' });
             }
 
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
-            // add an obstacle
+            // add a button
             if (this.frame.count % 120 === 0 || this.entities.length < 5) {
                 // pick a random lane/location
-                let obstacleLane = randomBetween(0, this.state.lanes, true);
-                let location = { x: this.state.laneSize * obstacleLane, y: -200 };
+                let button = randomProperty(this.buttons);
+                let location = { x: this.state.laneSize * button.lane, y: -200 };
 
                 // ignore crowded locations
                 let inValidLocation = this.entities.some((ent) => {
@@ -315,18 +329,18 @@ class Game {
                 });
 
                 if (!inValidLocation) {
-                    // add new obstacle
-                    let { obstacleImage } = this.images;
-                    let obstacleSize = resize({ image: obstacleImage, width: this.state.laneSize });
+                    // add new button
+                    let buttonImage = this.images[button.image.key]
+                    let buttonSize = resize({ image: buttonImage, width: this.state.laneSize });
 
-                    this.entities.push(new Obstacle({
+                    this.entities.push(new Button({
                         ctx: this.ctx,
-                        image: obstacleImage,
-                        lane: obstacleLane,
+                        image: buttonImage,
+                        lane: button.lane,
                         x: location.x,
                         y: location.y,
-                        width: obstacleSize.width,
-                        height: obstacleSize.height,
+                        width: buttonSize.width,
+                        height: buttonSize.height,
                         speed: this.state.gameSpeed,
                         bounds: this.screen
                     }))
@@ -395,9 +409,14 @@ class Game {
 
                     // add points
                     // increase game speed
+                    /*
                     this.setState({
                         score: Math.floor(this.state.score + (this.state.gameSpeed / 20)),
-                        gameSpeed: this.state.gameSpeed + 0.1 
+                        gameSpeed: this.state.gameSpeed + 0.01 
+                    });
+                    */
+                    this.setState({
+                        score: Math.floor(this.state.score + (this.state.gameSpeed / 20))
                     });
                 }
                 
@@ -456,12 +475,6 @@ class Game {
                 this.setState({ current: 'over' });
             }
 
-            // player bounce
-            let dy = Math.cos(this.frame.count / 5) / 30;
-
-            this.player.move(0, dy, this.frame.scale);
-            this.player.moveTo(this.state.playerLane * this.state.laneSize, this.screen.bottom - this.player.height); 
-            this.player.draw();
         }
 
         // game over
