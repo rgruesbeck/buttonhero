@@ -7,8 +7,7 @@
       "instructionsDesktop": "Use arrow keys to move: [ ⇠ ⇢ ]",
       "gameTopBar": true,
       "maxWidth": 740,
-      "gameSpeed": 10,
-      "lives": 3,
+      "gameSpeed": 15,
       "fontFamily": "Bungee Inline"
     },
     "@@editor": [
@@ -51,10 +50,6 @@
           {
             "key": "maxWidth",
             "name": "Max width on large screens"
-          },
-          {
-            "key": "lives",
-            "name": "How many lives a character has"
           },
           {
             "key": "fontFamily",

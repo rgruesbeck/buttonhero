@@ -55,10 +55,34 @@ const radialWaveEmitter = ({ n = 1, x = 0, y = 0, rd = 2, width = 50, hue = 0, a
     }; });
 }
 
+const semiCircleEmmitter = ({ n = 1, x = 0, y = 0, height = 100, width = 100, hue = 0, alpha = 1 }) => {
+    return Array.apply(null, { length: n })
+    .map(() => { return {
+        x: valueOrRange(x),
+        y: valueOrRange(y),
+        height: valueOrRange(height),
+        width: valueOrRange(width),
+        hue: valueOrRange(hue),
+        alpha: valueOrRange(alpha)
+    }; });
+}
+
+const convexCurveEmmitter = ({ n = 1, x = 0, y = 0, height = 100, width = 100, hue = 0, alpha = 1 }) => {
+    return Array.apply(null, { length: n })
+    .map(() => { return {
+        x: valueOrRange(x),
+        y: valueOrRange(y),
+        height: valueOrRange(height),
+        width: valueOrRange(width),
+        hue: valueOrRange(hue),
+        alpha: valueOrRange(alpha)
+    }; });
+}
+
 const drawParticle = (ctx, p) => {
     ctx.beginPath();
     ctx.arc(p.x >> 0, p.y >> 0, p.rd >> 0, 0, 2 * Math.PI, false);
-    ctx.fillStyle = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`;
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 100%, ${p.alpha})`;
     ctx.fill();
 }
 
@@ -77,69 +101,28 @@ const drawWave = (ctx, w) => {
     ctx.stroke();
 }
 
-function StarStream({ ctx, n = 1, x, y, vx, vy, rd, hue }) {
-    this.id = Math.random().toString(16).slice(2);
-    this.type = 'star-stream';
-    this.active = true;
-    this.ctx = ctx;
-    this.n = n;
-    this.x = x;
-    this.y = y;
-    this.vx = vx;
-    this.vy = vy;
-    this.rd = rd;
-    this.hue = hue;
-    this.stream = [];
-
-    // create new star
-    this.createStars = (n) => {
-        return praticleEmitter({
-            n: n,
-            x: this.x,
-            y: this.y,
-            vx: this.vx,
-            vy: this.vy,
-            rd: this.rd,
-            hue: this.hue,
-            alpha: 0
-        });
-    }
-
-    this.tick = () => {
-        // only tick if active
-        if (!this.active) { return; }
-
-        // loop through stars
-        for (let i = 0; i < this.stream.length; i++) {
-            let star = this.stream[i];
-
-            // update position
-            star.x += star.vx;
-            star.y += star.vy;
-
-            // update size and color
-            star.rd = Math.abs(star.rd - 0.025);
-            star.hue -= 0.25;
-            star.alpha += 0.050;
-
-            // remove offscreen stars
-            if (star.y > this.ctx.canvas.height) {
-                this.stream.splice(i, 1);
-            }
-
-            // draw shard
-            drawParticle(this.ctx, star);
-        }
-
-        // add new stars if less than n
-        if (this.stream.length < this.n) {
-            // add new stars to the stream
-            this.stream.push(...this.createStars(1));
-        }
-    }
+const drawSemiCircle = (ctx, c) => {
+   ctx.beginPath(); 
+   ctx.moveTo(c.x, c.y);
+   ctx.quadraticCurveTo(c.x + (c.width / 2), c.y - c.height, c.x + c.width, c.y);
+   ctx.closePath();
+   ctx.fillStyle = `hsla(${c.hue}, 100%, 90%, ${c.alpha})`;
+   ctx.fill();
 }
 
-function Burst({ ctx, n = 10, x, y, vx, vy, burnRate }) {
+const drawConvexCurve = (ctx, c) => {
+   ctx.beginPath(); 
+   ctx.moveTo(c.x, c.y);
+   ctx.quadraticCurveTo(c.x + (c.width / 2), c.y + (c.height / 2), c.x + c.width, c.y);
+   ctx.lineTo(c.x + c.width, c.y + c.height);
+   ctx.lineTo(c.x, c.y + c.height);
+   ctx.lineTo(c.x, c.y);
+   ctx.closePath();
+   ctx.fillStyle = `hsla(${c.hue}, 100%, 90%, ${c.alpha})`;
+   ctx.fill();
+}
+
+function Spark({ ctx, n = 10, x, y, vx, vy, burnRate }) {
     this.id = Math.random().toString(16).slice(2);
     this.type = 'burst';
     this.active = true;
@@ -152,11 +135,10 @@ function Burst({ ctx, n = 10, x, y, vx, vy, burnRate }) {
         y: y,
         vx: vx || [-10, 10],
         vy: vy || [-10, 10],
-        rd: [2, 4],
+        rd: [1, 3],
         hue: [200, 300]
     });
-
-    this.tick = () => {
+    this.tick = (frame) => {
         // only tick if active
         if (!this.active) { return; }
 
@@ -171,7 +153,7 @@ function Burst({ ctx, n = 10, x, y, vx, vy, burnRate }) {
             let shard = this.shards[i];
 
             // update position
-            shard.x += shard.vx;
+            shard.x += shard.vx * Math.cos(frame * shard.vx / 120);
             shard.y += shard.vy;
 
             // update size and color
@@ -189,108 +171,99 @@ function Burst({ ctx, n = 10, x, y, vx, vy, burnRate }) {
     }
 }
 
-function BlastWave({ ctx, x, y, width = 50, hue = [300, 350], burnRate = 100 }) {
+function Splash({ ctx, x, y, width, height, hue = [300, 350], burnRate = 100 }) {
     this.id = Math.random().toString(16).slice(2);
-    this.type = 'blast-wave';
+    this.type = 'splash';
     this.active = true;
     this.ctx = ctx;
     this.center = { x, y };
     this.burnRate = (Array.isArray(burnRate) ? randomBetween(burnRate[0], burnRate[1]) : burnRate) / 100;
-    this.waves = radialWaveEmitter({
+    this.sheets = semiCircleEmmitter({
         x: x,
         y: y,
-        rd: 25,
         width: width,
+        height: height,
         hue: hue,
         alpha: 1
     })
 
-    this.tick = () => {
+    this.tick = (frame) => {
         // only tick if active
         if (!this.active) { return; }
 
-        // flag as in-active when no more waves
-        if (this.waves.length === 0) {
+        // flag as in-active when no more sheets
+        if (this.sheets.length === 0) {
             this.active = false;
             return;
         }
 
         // loop through waves 
-        for (let i = 0; i < this.waves.length; i++) {
-            let wave = this.waves[i];
+        for (let i = 0; i < this.sheets.length; i++) {
+            let sheet = this.sheets[i];
 
             // draw waves
-            wave.rd += this.burnRate * 8;
-            wave.width -= this.burnRate / 2;
-            wave.hue -= this.burnRate;
-            wave.alpha -= this.burnRate * 0.0075;
+            // sheet.hue -= this.burnRate;
+            sheet.alpha -= this.burnRate;
+            console.log(this.burnRate, sheet.alpha);
 
-            // remove wave when larger than blast radius
-            if (wave.width < 1) {
-                this.waves.splice(i, 1);
+            if (sheet.alpha < 0) {
+                this.sheets.splice(i, 1);
             }
 
-            // draw wave
-            drawWave(this.ctx, wave);
+            // draw shimmer
+            drawConvexCurve(this.ctx, sheet);
         }
 
     }
 }
 
-function Pond({ ctx, x, y, width = 50, hue = [300, 350], burnRate = 100 }) {
+function Shimmer({ ctx, x, y, width, height, hue = [300, 350], burnRate = 100 }) {
     this.id = Math.random().toString(16).slice(2);
-    this.type = 'pond';
+    this.type = 'shimmer';
     this.active = true;
     this.ctx = ctx;
     this.center = { x, y };
     this.burnRate = (Array.isArray(burnRate) ? randomBetween(burnRate[0], burnRate[1]) : burnRate) / 100;
-    this.waves = radialWaveEmitter({
+    this.sheets = semiCircleEmmitter({
         x: x,
         y: y,
-        rd: 25,
         width: width,
+        height: height,
         hue: hue,
         alpha: 1
     })
 
-    this.tick = () => {
+    this.tick = (frame) => {
         // only tick if active
         if (!this.active) { return; }
 
-        // flag as in-active when no more waves
-        if (this.waves.length === 0) {
+        // flag as in-active when no more sheets
+        if (this.sheets.length === 0) {
             this.active = false;
             return;
         }
 
         // loop through waves 
-        for (let i = 0; i < this.waves.length; i++) {
-            let wave = this.waves[i];
+        for (let i = 0; i < this.sheets.length; i++) {
+            let sheet = this.sheets[i];
 
             // draw waves
-            wave.rd += this.burnRate * 8;
-            wave.width -= this.burnRate / 2;
-            wave.hue -= this.burnRate;
-            wave.alpha -= this.burnRate * 0.0075;
+            // sheet.hue -= this.burnRate;
+            sheet.alpha = Math.abs(Math.cos(frame / 60)) / 4 + 0.15;
 
-            // remove wave when larger than blast radius
-            if (wave.width < 1) {
-                this.waves.splice(i, 1);
+            if (sheet.width < 1) {
+                this.sheets.splice(i, 1);
             }
 
-            // draw wave
-            drawWave(this.ctx, wave);
+            // draw shimmer
+            drawConvexCurve(this.ctx, sheet);
         }
 
     }
 }
 
 export {
-    praticleEmitter,
-    radialWaveEmitter,
-    drawParticle,
-    drawWave,
-    Burst,
-    BlastWave,
-    StarStream
+    Spark,
+    Splash,
+    Shimmer
 };

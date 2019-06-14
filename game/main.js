@@ -36,7 +36,6 @@ import {
 
 import {
     hashCode,
-    randomBetween,
     randomProperty,
     throttled
 } from './utils/baseUtils.js';
@@ -54,12 +53,12 @@ import {
 } from './utils/inputUtils.js';
 
 import {
-    Burst,
-    BlastWave,
+    Spark,
+    Splash,
+    Shimmer,
 } from './objects/effects.js';
 
 import Button from './characters/button.js';
-import { collideDistance } from './utils/spriteUtils.js';
 
 class Game {
 
@@ -76,7 +75,6 @@ class Game {
         this.ctx = canvas.getContext("2d"); // game screen context
 
         // setup throttled functions
-        this.decrementLife = throttled(1200, () => this.state.lives -= 1);
         this.throttledBlastWave = throttled(600, (bw) => new BlastWave(bw));
         this.throttledBurst = throttled(300, (br) => new Burst(br));
 
@@ -171,7 +169,7 @@ class Game {
             laneSize: Math.floor(this.canvas.width / lanes),
             gameSpeed: parseInt(this.config.settings.gameSpeed),
             score: 0,
-            lives: parseInt(this.config.settings.lives),
+            power: 100,
             paused: false,
             muted: localStorage.getItem(this.prefix.concat('muted')) === 'true'
         };
@@ -272,14 +270,10 @@ class Game {
         // no matter the game state
         this.ctx.drawImage(this.images.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
 
-        // update score and lives
-        this.overlay.setLives(this.state.lives);
-        this.overlay.setScore(this.state.score);
-
         // ready to play
         if (this.state.current === 'ready') {
 
-            // dispaly menu after loading or game over
+            // display menu after loading or game over
             if (this.state.prev.match(/loading|over/)) {
                 this.overlay.hide('loading');
                 this.canvas.style.opacity = 1;
@@ -291,7 +285,7 @@ class Game {
                     mobile: this.config.settings.instructionsMobile
                 });
 
-                this.overlay.show('stats');
+                this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
                 this.overlay.setMute(this.state.muted);
                 this.overlay.setPause(this.state.paused);
@@ -309,8 +303,39 @@ class Game {
             if (this.state.prev === 'ready') {
                 this.overlay.hide(['banner', 'button', 'instructions'])
 
+                // add goals
+                this.goals = Object.entries(this.buttons)
+                .map(ent => ent[1])
+                .map(button => {
+                    let image = this.images[button.image.key];
+                    let size = resize({ image: image, width: this.state.laneSize * 0.75 });
+                    return new Button({
+                        meta: { lane: button.lane, keycode: button.keycode.value },
+                        ctx: this.ctx,
+                        image: image,
+                        lane: button.lane,
+                        x: (button.lane * this.state.laneSize) + (size.width / 8),
+                        y: this.screen.bottom - size.height * 1.25,
+                        width: size.width,
+                        height: size.height,
+                        speed: this.state.gameSpeed,
+                        bounds: this.screen
+                    })
+                });
+
+                // start shimmer
+                this.effects.push(new Shimmer({
+                    ctx: this.ctx,
+                    x: 0,
+                    y: this.screen.bottom - 100,
+                    width: this.screen.right,
+                    height: 100
+                }));
+
                 this.setState({ current: 'play' });
             }
+
+            this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
@@ -327,21 +352,36 @@ class Game {
 
                 if (!inValidLocation) {
                     // add new button
-                    let buttonImage = this.images[button.image.key]
-                    let buttonSize = resize({ image: buttonImage, width: this.state.laneSize });
+                    let image = this.images[button.image.key]
+                    let size = resize({ image: image, width: this.state.laneSize * 0.75 });
 
                     this.entities.push(new Button({
+                        meta: { lane: button.lane, keycode: button.keycode.value },
                         ctx: this.ctx,
-                        image: buttonImage,
+                        image: image,
                         lane: button.lane,
-                        x: location.x,
+                        x: (button.lane * this.state.laneSize) + (size.width / 8),
                         y: location.y,
-                        width: buttonSize.width,
-                        height: buttonSize.height,
+                        width: size.width,
+                        height: size.height,
                         speed: this.state.gameSpeed,
                         bounds: this.screen
                     }))
                 }
+            }
+
+            // update and draw effects
+            for (let i = 0; i < this.effects.length; i++) {
+                let effect = this.effects[i];
+
+                // run effect tick
+                effect.tick(this.frame.count);
+
+                // remove in-active effects
+                if (!effect.active) {
+                    this.effects.splice(i, 1);
+                }
+                
             }
 
 
@@ -351,22 +391,21 @@ class Game {
 
                 button.move(0, 1, this.frame.scale);
                 button.draw();
-                
-            }
 
-            // update and draw effects
-            for (let i = 0; i < this.effects.length; i++) {
-                let effect = this.effects[i];
-
-                // run effect tick
-                effect.tick();
-
-                // remove in-active effects
-                if (!effect.active) {
-                    this.effects.splice(i, 1);
+                // remove off-screen buttons
+                if (button.y > this.screen.bottom) {
+                    this.entities.splice(i, 1);
                 }
                 
             }
+
+            // update and draw goals
+            for (let i = 0; i < this.goals.length; i++) {
+                const goalButton = this.goals[i];
+
+                goalButton.draw();
+            }
+
 
         }
 
@@ -396,6 +435,72 @@ class Game {
 
         // draw the next screen
         this.requestFrame(() => this.play());
+    }
+
+    // check hit
+    checkGoalAttempt(goal) {
+        // success when a goal
+        // if goal is less than some distance from
+        // a button of the same type
+        this.entities.forEach(target => {
+            // valid target
+            let validTarget = target.meta.keycode === goal.meta.keycode;
+
+            // within range
+            let threshold = goal.height / 4; // within threshold when within 25%
+            let range = Math.abs(goal.y - target.y);
+            let withinRange = range < threshold;
+
+            // handle hits
+            if (validTarget && withinRange) {
+
+                // add score to powerbar
+                let targetScore = Math.abs((range - threshold) / threshold);
+                this.setState({
+                    score: this.state.score + Math.floor(targetScore * 10),
+                    power: Math.min(this.state.power + (targetScore * 25), 100)
+                })
+
+                // success feedback
+                this.animateSuccess(goal);
+
+            } else {
+                // remove points from powerbar
+                this.setState({
+                    power: Math.min(this.state.power - (this.state.power / 50), 100)
+                })
+            }
+        });
+
+        // press goal button
+        goal.pressed();
+    }
+
+    animateSuccess(goal) {
+
+        this.effects.push(
+            new Spark({
+                ctx: this.ctx,
+                n: 10,
+                x: goal.cx,
+                y: goal.cy,
+                vx: [-2, 2],
+                vy: [-3, -1],
+                color: '#ffffff',
+                burnRate: 0.001
+            }),
+            new Splash({
+                ctx: this.ctx,
+                x: goal.x,
+                y: goal.y,
+                width: goal.width,
+                height: goal.height,
+                burnRate: 1
+            })
+        );
+
+        console.log('success', this.effects);
+
     }
 
     // event listeners
@@ -433,31 +538,14 @@ class Game {
     }
 
     handleKeyboardInput(type, code) {
-        this.input.active = 'keyboard';
-
+        // check matching goal
         if (type === 'keydown' && this.state.current === 'play') {
-            if (code === 'ArrowRight') {
-                this.input.keyboard.right = true;
-            }
-            if (code === 'ArrowLeft') {
-                this.input.keyboard.left = true;
-            }
-        }
+            // get goal matching keycode
+            let goal = this.goals
+            .find(g => g.meta.keycode === code);
 
-        if (type === 'keyup' && this.state.current === 'play') {
-            if (code === 'ArrowRight') {
-                this.input.keyboard.right = false;
-                this.shiftRight();
-            }
-            if (code === 'ArrowLeft') {
-                this.input.keyboard.left = false;
-                this.shiftLeft();
-            }
-
-            if (code === 'Space') {
-
-                this.pause(); // pause
-            }
+            // check goal attempt
+            goal && this.checkGoalAttempt(goal);
         }
 
         // start game on read

@@ -32,9 +32,8 @@ class Overlay {
         this.banner = node.querySelector('#banner');
         this.button = node.querySelector('#button');
         this.instructions = node.querySelector('#instructions');
+        this.power = node.querySelector('#power');
 
-        this.score = node.querySelector('#score');
-        this.lives = node.querySelector('#lives');
         this.mute = node.querySelector('#mute');
         this.pause = node.querySelector('#pause');
 
@@ -65,14 +64,14 @@ class Overlay {
         this.show('instructions');
     }
 
-    setScore(score) {
-        this.score.textContent = `Score: ${score}`;
-        this.show('score');
-    }
+    setStats({ score = 0, power = 100 }) {
+        // set power bar
+        this.power.style.width = `${power}%`;
 
-    setLives(lives) {
-        this.lives.textContent = `Lives: ${lives}`;
-        this.show('lives');
+        // set power bar
+        this.power.textContent = `score: ${score}`;
+
+        this.show('power');
     }
 
     setMute(muted) {
