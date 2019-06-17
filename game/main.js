@@ -48,8 +48,7 @@ import {
 } from './utils/spriteUtils.js';
 
 import {
-    Spark,
-    Shimmer,
+    Spark
 } from './objects/effects.js';
 
 import Button from './characters/button.js';
@@ -312,15 +311,6 @@ class Game {
                         bounds: this.screen
                     })
                 });
-
-                // start shimmer
-                this.effects.push(new Shimmer({
-                    ctx: this.ctx,
-                    x: 0,
-                    y: this.screen.bottom - 100,
-                    width: this.screen.right,
-                    height: 100
-                }));
 
                 this.setState({ current: 'play' });
             }
