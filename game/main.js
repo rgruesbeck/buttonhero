@@ -37,7 +37,6 @@ import {
 import {
     hashCode,
     randomProperty,
-    throttled
 } from './utils/baseUtils.js';
 
 import {
@@ -49,12 +48,7 @@ import {
 } from './utils/spriteUtils.js';
 
 import {
-    canvasInputPosition
-} from './utils/inputUtils.js';
-
-import {
     Spark,
-    Splash,
     Shimmer,
 } from './objects/effects.js';
 
@@ -73,10 +67,6 @@ class Game {
 
         this.canvas = canvas; // game screen
         this.ctx = canvas.getContext("2d"); // game screen context
-
-        // setup throttled functions
-        this.throttledBlastWave = throttled(600, (bw) => new BlastWave(bw));
-        this.throttledBurst = throttled(300, (br) => new Burst(br));
 
         // setup event listeners
         // handle keyboard events
@@ -130,7 +120,7 @@ class Game {
                     type: f.type
                 }
             })
-            .reduce((acc, cur, idx) => {
+            .reduce((acc, cur) => {
                 let key = cur.key.replace(/Key|Image/, '');
 
                 // allocate key
@@ -442,7 +432,7 @@ class Game {
         // success when a goal
         // if goal is less than some distance from
         // a button of the same type
-        this.entities.forEach(target => {
+        this.entities.forEach((target, index) => {
             // valid target
             let validTarget = target.meta.keycode === goal.meta.keycode;
 
@@ -453,6 +443,9 @@ class Game {
 
             // handle hits
             if (validTarget && withinRange) {
+
+                // remove target
+                this.entities.splice(index, 1);
 
                 // add score to powerbar
                 let targetScore = Math.abs((range - threshold) / threshold);
@@ -481,25 +474,15 @@ class Game {
         this.effects.push(
             new Spark({
                 ctx: this.ctx,
-                n: 10,
-                x: goal.cx,
-                y: goal.cy,
+                n: 25,
+                x: [goal.x, goal.x + goal.width],
+                y: [goal.y, goal.y + goal.height],
                 vx: [-2, 2],
-                vy: [-3, -1],
+                vy: [-4, -1],
                 color: '#ffffff',
-                burnRate: 0.001
-            }),
-            new Splash({
-                ctx: this.ctx,
-                x: goal.x,
-                y: goal.y,
-                width: goal.width,
-                height: goal.height,
-                burnRate: 1
+                burnRate: 0.01
             })
         );
-
-        console.log('success', this.effects);
 
     }
 
@@ -560,7 +543,7 @@ class Game {
 
     }
 
-    handleTap(e) {
+    handleTap() {
         // let location = canvasInputPosition(this.canvas, e.touches[0]);
     }
 

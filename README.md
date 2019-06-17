@@ -1,14 +1,16 @@
-# Vertical
+# Button Hero
 
-A vertical obstacle game.
+A guitar hero style button game
 
 # VCC's
 
 - 🎮 Change the text and game settings
     * [Open configuration](#~/.koji/customization/settings.json!visual)
-- 🖼️ Replace the player, background and more
+- 🔘 Replace the button images and key
+    * [Open configuration](#~/.koji/customization/buttons.json!visual)
+- 🖼 Replace background image
     * [Open configuration](#~/.koji/customization/images.json!visual)
-- 🔈 Change the sounds and background music.
+- 🔈 Change the sounds and background music
     * [Open configuration](#~/.koji/customization/sounds.json!visual)
 - 💅 Change the colors and visual style
     * [Open configuration](#~/.koji/customization/colors.json!visual)
@@ -29,7 +31,7 @@ This directory contains the main game code.
 
 ### ~/game/characters
 This directory contains code for the game characters.
-- [Player: game/characters/player.js](#~/game/characters/player.js) an example game character.
+- [Button: game/characters/button.js](#~/game/characters/button.js) code for the buttons.
 
 ### ~/game/objects
 This directory contains code base classes like image, sprite, etc.
@@ -55,4 +57,3 @@ If you need any help, you can ask the community by [making a post](https://gokoj
 ### Helpful Resources
 - [Mozilla Game Development Docs](https://developer.mozilla.org/en-US/docs/Games).
 - [HTML5 Game Devs Forum](http://www.html5gamedevs.com/).
-- [Canvas Cheat Sheet](http://cheatsheetworld.com/programming/html5-canvas-cheat-sheet/).
