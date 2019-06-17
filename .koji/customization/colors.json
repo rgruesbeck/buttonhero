@@ -25,6 +25,16 @@
           "type": "color"
         },
         {
+          "key": "sparkColor",
+          "name": "Spark Color",
+          "type": "color"
+        },
+        {
+          "key": "burnColor",
+          "name": "Burn Color",
+          "type": "color"
+        },
+        {
           "key": "backgroundColor",
           "name": "Background color",
           "type": "color"
