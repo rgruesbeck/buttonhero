@@ -13,7 +13,7 @@
     {
       "key": "buttons",
       "name": "Buttons",
-      "icon": "🖼️",
+      "icon": "️🔘",
       "source": "buttons.json",
       "fields": [
         {
