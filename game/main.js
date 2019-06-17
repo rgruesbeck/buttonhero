@@ -215,10 +215,7 @@ class Game {
         const gameAssets = [
             loadImage('backgroundImage', this.config.images.backgroundImage),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
-            loadSound('powerUpSound', this.config.sounds.powerUpSound),
-            loadSound('turnSound', this.config.sounds.turnSound),
-            loadSound('hitSound', this.config.sounds.hitSound),
-            loadSound('gameOverSound', this.config.sounds.gameOverSound),
+            loadSound('successSound', this.config.sounds.successSound),
             loadFont('gameFont', this.config.settings.fontFamily)
         ];
 
@@ -446,6 +443,10 @@ class Game {
 
                 // success feedback
                 this.animateSuccess(goal);
+
+                // play success sound
+                this.sounds.successSound.currentTime = 0;
+                this.sounds.successSound.play();
 
             } else {
                 // remove points from powerbar
