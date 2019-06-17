@@ -1,9 +1,9 @@
 {
   "colors": {
-    "textColor": "#fdf8f8",
-    "primaryColor": "#2c407b",
-    "burstColor": "#fdec8e",
-    "blastWaveColor": "#fdec8e",
+    "textColor": "#FFF1c0",
+    "primaryColor": "#494373",
+    "sparkColor": "#FFF1c0",
+    "burnColor": "#FFF1c0",
     "backgroundColor": "#494373"
   },
   "@@editor": [

@@ -1,19 +1,19 @@
 {
   "buttons": {
-    "button1Image": "https://i.imgur.com/FYUa8v9.png",
+    "button1Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/sun.png",
     "button1Key": "Digit1",
-    "button2Image": "https://i.imgur.com/II3Lyp5.png",
+    "button2Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/moon.png",
     "button2Key": "Digit2",
-    "button3Image": "https://i.imgur.com/mWjjAIT.png",
+    "button3Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/earth.png",
     "button3Key": "Digit3",
-    "button4Image": "https://i.imgur.com/IL9cQOS.png",
+    "button4Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/mars2.png",
     "button4Key": "Digit4"
   },
   "@@editor": [
     {
       "key": "buttons",
       "name": "Buttons",
-      "icon": "️🔘",
+      "icon": "🖼️",
       "source": "buttons.json",
       "fields": [
         {

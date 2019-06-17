@@ -5,7 +5,7 @@
       "gameoverText": "Game Over",
       "instructionsMobile": "Swipe left and right to avoid obstacles",
       "instructionsDesktop": "Use arrow keys to move: [ ⇠ ⇢ ]",
-      "gameTopBar": true,
+      "gameTopBar": false,
       "maxWidth": 740,
       "gameSpeed": 15,
       "fontFamily": "Bungee Inline"

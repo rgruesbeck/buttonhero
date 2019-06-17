@@ -17,9 +17,18 @@ class Button extends ImageSprite {
     constructor(options) {
         super(options);
 
+        // save original width and height
+        this.originalWidth = options.width;
+        this.originalHeight = options.height;
+
+        // save original position
+        this.originalX = options.x;
+        this.originalY = options.y;
+
         this.id = Math.random().toString(16).slice(2);
         this.meta = options.meta;
         this.active = true;
+        this.goal = options.goal || false;
         this.lane = options.lane;
         this.bounds = {
             top: -200,
@@ -27,48 +36,46 @@ class Button extends ImageSprite {
             left: -200,
             bottom: 2000
         };
+
     }
 
     draw() {
-        // return to originalWidth
-        if (this.width < this.originalWidth) {
-            this.width += (this.originalWidth - this.width) / 10;
-        }
+        if (this.goal) {
+            // return to originalWidth
+            if (this.width < this.originalWidth) {
+                this.width += (this.originalWidth - this.width) / 10;
+            }
 
-        // return to originalHeight
-        if (this.height < this.originalHeight) {
-            this.height += (this.originalHeight - this.height) / 10;
-        }
+            // return to originalHeight
+            if (this.height < this.originalHeight) {
+                this.height += (this.originalHeight - this.height) / 10;
+            }
 
-        // return to originalX
-        if (this.x > this.originalX) {
-            this.x -= (this.x - this.originalX) / 10;
-        }
+            // return to originalX
+            if (this.x > this.originalX) {
+                this.x -= (this.x - this.originalX) / 10;
+            }
 
-        // return to originalY
-        if (this.y > this.originalY) {
-            this.y -= (this.y - this.originalY) / 10;
+            // return to originalY
+            if (this.y > this.originalY) {
+                this.y -= (this.y - this.originalY) / 10;
+            }
+
         }
 
         super.draw();
     }
 
     pressed() {
-        // save original width and height
-        this.originalWidth = this.width;
-        this.originalHeight = this.height;
+        if (this.goal) {
+            // set pressed width and height
+            this.width = this.width - (this.width / 8);
+            this.height = this.height - (this.height / 8);
 
-        // save original position
-        this.originalX = this.x;
-        this.originalY = this.y;
-
-        // set pressed width and height
-        this.width = this.width - (this.width / 8);
-        this.height = this.height - (this.height / 8);
-
-        // set pressed position
-        this.x = this.x + (this.width / 16);
-        this.y = this.y + (this.height / 16);
+            // set pressed position
+            this.x = this.x + (this.width / 16);
+            this.y = this.y + (this.height / 16);
+        }
     }
 }
 

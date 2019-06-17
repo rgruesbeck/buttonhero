@@ -48,7 +48,8 @@ import {
 } from './utils/spriteUtils.js';
 
 import {
-    Spark
+    Spark,
+    Burn
 } from './objects/effects.js';
 
 import Button from './characters/button.js';
@@ -296,6 +297,7 @@ class Game {
                     let image = this.images[button.image.key];
                     let size = resize({ image: image, width: this.state.laneSize * 0.75 });
                     return new Button({
+                        goal: true,
                         meta: { lane: button.lane, keycode: button.keycode.value },
                         ctx: this.ctx,
                         image: image,
@@ -384,11 +386,18 @@ class Game {
             }
 
 
+            // check for game over
+            if (this.state.power < 5) {
+                this.setState({ current: 'over' });
+            }
+
+
         }
 
         // game over
         if (this.state.current === 'over') {
             // game over code
+            this.overlay.setBanner(this.config.settings.gameoverText);
 
             // update and draw effects
             for (let i = 0; i < this.effects.length; i++) {
@@ -404,8 +413,8 @@ class Game {
                 
             }
 
-            if (this.effects.length === 1) {
-                setTimeout(this.load(), 2000);
+            if (!this.effects.length) {
+                this.load();
             }
 
         }
@@ -424,7 +433,7 @@ class Game {
             let validTarget = target.meta.keycode === goal.meta.keycode;
 
             // within range
-            let threshold = goal.height / 4; // within threshold when within 25%
+            let threshold = goal.height / 2; // within threshold when within 25%
             let range = Math.abs(goal.y - target.y);
             let withinRange = range < threshold;
 
@@ -437,8 +446,10 @@ class Game {
                 // add score to powerbar
                 let targetScore = Math.abs((range - threshold) / threshold);
                 this.setState({
-                    score: this.state.score + Math.floor(targetScore * 10),
-                    power: Math.min(this.state.power + (targetScore * 25), 100)
+                    score: this.state.score + Math.floor(targetScore * 10), // add score
+                    power: Math.min(this.state.power + (targetScore * 25), 100), // add power
+                    passStreak: 0, // reset pass streak
+                    gameSpeed: this.state.gameSpeed + 0.1 // increase game speed
                 })
 
                 // success feedback
@@ -451,7 +462,7 @@ class Game {
             } else {
                 // remove points from powerbar
                 this.setState({
-                    power: Math.min(this.state.power - (this.state.power / 50), 100)
+                    power: Math.min(this.state.power - (this.state.power / 50), 100) // remove power
                 })
             }
         });
@@ -470,8 +481,14 @@ class Game {
                 y: [goal.y, goal.y + goal.height],
                 vx: [-2, 2],
                 vy: [-4, -1],
-                color: '#ffffff',
+                color: this.config.colors.sparkColor,
                 burnRate: 0.01
+            }),
+            new Burn({
+                ctx: this.ctx,
+                x: goal.cx,
+                y: goal.cy,
+                color: this.config.colors.burnColor
             })
         );
 

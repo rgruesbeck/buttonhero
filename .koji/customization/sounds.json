@@ -1,7 +1,7 @@
 {
   "sounds": {
-    "backgroundMusic": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroBackground.mp3",
-    "successSound": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroSuccess.mp3"
+    "backgroundMusic": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroBackground2.mp3",
+    "successSound": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroSuccess2.mp3"
   },
   "@@editor": [
     {
