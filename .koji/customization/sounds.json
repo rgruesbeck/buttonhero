@@ -1,7 +1,7 @@
 {
   "sounds": {
-    "backgroundMusic": "https://objects.koji-cdn.com/63bc2fb0-0c42-4acb-bee8-a060e9286a95/backgroundMusicSpace.mp3",
-    "successSound": "https://objects.koji-cdn.com/9c59feed-9d8f-4bde-8986-1ef50488d826/subimpact.mp3"
+    "backgroundMusic": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroBackground.mp3",
+    "successSound": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroSuccess.mp3"
   },
   "@@editor": [
     {
@@ -17,9 +17,9 @@
           "type": "sound"
         },
         {
-          "key": "gameOverSound",
-          "name": "Game Over Sound",
-          "description": "Sound when game is over",
+          "key": "successSound",
+          "name": "Success Sound",
+          "description": "Sound when successful button hit",
           "type": "sound"
         }
       ]
