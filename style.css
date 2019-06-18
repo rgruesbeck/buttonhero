@@ -157,7 +157,6 @@ canvas {
     height: 1.35em;
     border-radius: 10em;
     line-height: 1.4;
-    padding-left 5px;
     transition: width 0.5s;
 }
 
