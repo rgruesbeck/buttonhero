@@ -25,7 +25,7 @@
         {
           "key": "button1Key",
           "name": "Button 1 Key",
-          "description": "Button 1 key",
+          "description": "Button 1 key: check https://keycode.info/ for event.code text",
           "type": "text"
         },
         {
@@ -37,7 +37,7 @@
         {
           "key": "button2Key",
           "name": "Button 2 Key",
-          "description": "Button 2 key",
+          "description": "Button 2 key: check https://keycode.info/ for event.code text",
           "type": "text"
         },
         {
@@ -49,7 +49,7 @@
         {
           "key": "button3Key",
           "name": "Button 3 Key",
-          "description": "Button 3 key",
+          "description": "Button 3 key: check https://keycode.info/ for event.code text",
           "type": "text"
         },
         {
@@ -61,7 +61,7 @@
         {
           "key": "button4Key",
           "name": "Button 4 Key",
-          "description": "Button 4 key",
+          "description": "Button 4 key: check https://keycode.info/ for event.code text",
           "type": "text"
         }
       ]

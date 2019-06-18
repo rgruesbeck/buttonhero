@@ -48,6 +48,10 @@ import {
 } from './utils/spriteUtils.js';
 
 import {
+    canvasInputPosition
+} from './utils/inputUtils.js'
+
+import {
     Spark,
     Burn
 } from './objects/effects.js';
@@ -551,8 +555,23 @@ class Game {
 
     }
 
-    handleTap() {
-        // let location = canvasInputPosition(this.canvas, e.touches[0]);
+    handleTap(e) {
+        // get location tap
+        let location = canvasInputPosition(this.canvas, e.touches[0]);
+
+        // get goal
+        let goal = this.goals.find((goal) => {
+            let overlapsX = location.x > goal.x && location.x < goal.x + goal.width;
+            let overlapsY = location.y > goal.y && location.y < goal.y + goal.width;
+
+            return overlapsX && overlapsY;
+        })
+
+        // check
+        if (goal) {
+
+            this.checkGoalAttempt(goal);
+        }
     }
 
     handleResize() {
