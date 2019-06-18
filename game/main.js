@@ -523,13 +523,6 @@ class Game {
 
             this.setState({ current: 'play' });
         }
-
-        /*
-        console.log('----- snapshot -----');
-        console.log(this.effects);
-        console.log(this.entities);
-        console.log(this.goals);
-        */
     }
 
     handleKeyboardInput(type, code) {
