@@ -1,12 +1,12 @@
 {
   "buttons": {
-    "button1Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/sun.png",
+    "button1Image": "https://images.koji-cdn.com/5b760b14-b812-40b7-b285-a38d270f8b71/aries.png",
     "button1Key": "Digit7",
-    "button2Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/moon.png",
+    "button2Image": "https://images.koji-cdn.com/5b760b14-b812-40b7-b285-a38d270f8b71/scorpio.png",
     "button2Key": "Digit8",
-    "button3Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/earth.png",
+    "button3Image": "https://images.koji-cdn.com/5b760b14-b812-40b7-b285-a38d270f8b71/libra.png",
     "button3Key": "Digit9",
-    "button4Image": "https://images.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/mars2.png",
+    "button4Image": "https://images.koji-cdn.com/5b760b14-b812-40b7-b285-a38d270f8b71/sagittarius.png",
     "button4Key": "Digit0"
   },
   "@@editor": [

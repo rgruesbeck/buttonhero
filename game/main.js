@@ -279,15 +279,14 @@ class Game {
 
         this.setState({
             current: 'ready',
-            keyMap: this.goals.map((g, idx, arr) => `
-                <span>
+            keyMap: this.goals.map((g) => `
+                <div style="display: flex; align-items: center; justify-content: center; max-height: 100px; margin: 0.25em;">
                     <img 
                         src="${g.image.src}"
-                        style="width: 10vw"
+                        style="height: 100%;"
                     />
-                    <span>${g.meta.keycode}</span>
-                </span>
-                ${idx % Math.floor(Math.sqrt(arr.length)) === 0 ? '' : '<br>'}
+                    <span style="margin: 8px;">${g.meta.keycode.replace(/Digit|Key/, '')}</span>
+                </div>
             `)
         });
 
@@ -316,10 +315,17 @@ class Game {
                 this.overlay.setBanner(this.config.settings.name);
                 this.overlay.setButton(this.config.settings.startText);
                 this.overlay.setInstructions({
-                    desktop: this.config.settings.instructionsDesktop
-                    .concat('<br>', this.state.keyMap.join('')),
+                    desktop: `
+                        ${this.config.settings.instructionsDesktop}
+                        <div style="display: flex; flex-direction: column; height: 40vh;">
+                            ${this.state.keyMap.join('')}
+                        </div>
+                    `,
                     mobile: this.config.settings.instructionsMobile
                 });
+
+                 //   desktop: this.config.settings.instructionsDesktop
+                 //   .concat(this.state.keyMap.join('')),
 
                 this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
