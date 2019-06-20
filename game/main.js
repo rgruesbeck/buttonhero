@@ -165,7 +165,8 @@ class Game {
             score: 0,
             power: 100,
             paused: false,
-            muted: localStorage.getItem(this.prefix.concat('muted')) === 'true'
+            muted: localStorage.getItem(this.prefix.concat('muted')) === 'true',
+            keyMap: ''
         };
 
         this.input = {
@@ -244,9 +245,52 @@ class Game {
         // create game characters
 
         // set overlay styles
-        this.overlay.setStyles({...this.config.colors, ...this.config.settings});
+        this.overlay.setStyles({
+            ...this.config.colors,
+            ...this.config.settings
+        });
 
-        this.setState({ current: 'ready' });
+        // add goals
+        this.goals = Object.entries(this.buttons)
+            .map(ent => ent[1])
+            .map(button => {
+                let image = this.images[button.image.key];
+                let size = resize({
+                    image: image,
+                    width: this.state.laneSize * 0.75
+                });
+                return new Button({
+                    goal: true,
+                    meta: {
+                        lane: button.lane,
+                        keycode: button.keycode.value
+                    },
+                    ctx: this.ctx,
+                    image: image,
+                    lane: button.lane,
+                    x: (button.lane * this.state.laneSize) + (size.width / 8),
+                    y: this.screen.bottom - size.height * 1.25,
+                    width: size.width,
+                    height: size.height,
+                    speed: this.state.gameSpeed,
+                    bounds: this.screen
+                })
+            });
+
+        this.setState({
+            current: 'ready',
+            keyMap: this.goals.map((g, idx, arr) => `
+                <span>
+                    <img 
+                        src="${g.image.src}"
+                        style="width: 10vw"
+                    />
+                    <span>${g.meta.keycode}</span>
+                </span>
+                ${idx % Math.floor(Math.sqrt(arr.length)) === 0 ? '' : '<br>'}
+            `)
+        });
+
         this.play();
     }
 
@@ -272,7 +316,8 @@ class Game {
                 this.overlay.setBanner(this.config.settings.name);
                 this.overlay.setButton(this.config.settings.startText);
                 this.overlay.setInstructions({
-                    desktop: this.config.settings.instructionsDesktop,
+                    desktop: this.config.settings.instructionsDesktop
+                    .concat('<br>', this.state.keyMap.join('')),
                     mobile: this.config.settings.instructionsMobile
                 });
 
@@ -293,27 +338,6 @@ class Game {
             // hide overlay items
             if (this.state.prev === 'ready') {
                 this.overlay.hide(['banner', 'button', 'instructions'])
-
-                // add goals
-                this.goals = Object.entries(this.buttons)
-                .map(ent => ent[1])
-                .map(button => {
-                    let image = this.images[button.image.key];
-                    let size = resize({ image: image, width: this.state.laneSize * 0.75 });
-                    return new Button({
-                        goal: true,
-                        meta: { lane: button.lane, keycode: button.keycode.value },
-                        ctx: this.ctx,
-                        image: image,
-                        lane: button.lane,
-                        x: (button.lane * this.state.laneSize) + (size.width / 8),
-                        y: this.screen.bottom - size.height * 1.25,
-                        width: size.width,
-                        height: size.height,
-                        speed: this.state.gameSpeed,
-                        bounds: this.screen
-                    })
-                });
 
                 this.setState({ current: 'play' });
             }
@@ -386,6 +410,7 @@ class Game {
             for (let i = 0; i < this.goals.length; i++) {
                 const goalButton = this.goals[i];
 
+                // draw goal
                 goalButton.draw();
             }
 

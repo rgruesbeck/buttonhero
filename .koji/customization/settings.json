@@ -4,7 +4,7 @@
       "startText": "Start",
       "gameoverText": "Game Over",
       "instructionsMobile": "Tap on goal to hit buttons",
-      "instructionsDesktop": "Use keys [ 1, 2, 3, 4 ] to hit buttons",
+      "instructionsDesktop": "Use keys to hit buttons",
       "gameTopBar": false,
       "maxWidth": 740,
       "gameSpeed": 15,
