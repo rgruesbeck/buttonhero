@@ -19,7 +19,7 @@
         {
           "key": "button1Image",
           "name": "Button 1 Image",
-          "description": "Button 1 image",
+          "description": "Button 1 image: recommended image size width=512px height=512px",
           "type": "image"
         },
         {
@@ -31,7 +31,7 @@
         {
           "key": "button2Image",
           "name": "Button 2 Image",
-          "description": "Button 2 image",
+          "description": "Button 2 image: recommended image size width=512px height=512px",
           "type": "image"
         },
         {
@@ -43,7 +43,7 @@
         {
           "key": "button3Image",
           "name": "Button 3 Image",
-          "description": "Button 3 image",
+          "description": "Button 3 image: recommended image size width=512px height=512px",
           "type": "image"
         },
         {
@@ -55,7 +55,7 @@
         {
           "key": "button4Image",
           "name": "Button 4 Image",
-          "description": "Button 4 image",
+          "description": "Button 4 image: recommended image size width=512px height=512px",
           "type": "image"
         },
         {
