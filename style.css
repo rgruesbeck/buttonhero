@@ -129,23 +129,11 @@ canvas {
     transition: opacity 1s;
 }
 
-
-/*
-    desktop instructions
-    // container
-    // item display: flex; align-items: center; justify-content: center; max-height: 100px; margin: 0.25em;
-    // item: image height: 100%;
-    // item: span margin: 8px;
-*/
-
 .container #instructions .desktop div {
     display: flex;
     flex-direction: column;
     height: 40vh;
 }
-
-
-/* <div id="desktop-instruction-item"> */
 
 .container #instructions #desktop-instructions-item {
     display: flex;

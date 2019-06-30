@@ -231,14 +231,22 @@ class Game {
             .map(button => loadImage(button.image.key, button.image.value));
 
         // put the loaded assets the respective containers
-        loadList([...gameAssets, ...buttonImages])
+        loadList(
+                [...gameAssets, ...buttonImages],
+                (progress) => {
+                    console.log('progress', progress);
+                })
             .then((assets) => {
+                console.log('done', assets);
 
+                // attach assets
                 this.images = assets.image;
                 this.sounds = assets.sound;
 
+                // create
+                this.create();
             })
-            .then(() => this.create());
+            .catch(err => console.error(err));
     }
 
     create() {

@@ -54,102 +54,107 @@
  *   
  */
 
+import audioBufferLoader from 'audio-loader';
 import WebFont from 'webfontloader';
 import { createBase64Image } from '../utils/imageUtils.js';
 import { blankImage, defaultImage } from './placeholders.js';
 
-const loadList = (list) => {
-  return Promise.all(list)
-  .then((assets) => {
-    return assets.reduce((collection, asset) => {
-      // separate assets by type
-      // add them to the collection
+const loadList = (list, progress) => {
+    // calculate loading progress
+    let i = 0;
+    progress({ percent: 0, loaded: null });
+    for (const prm of list) {
+        prm.then((asset) => {
+            i++;
+            progress({
+                percent: Math.floor(i * 100 / list.length),
+                loaded: { type: asset.type, key: asset.key }
+            })
+        });
+    }
 
-      const { type, key, value } = asset;
+    return Promise.all(list)
+        .then((assets) => {
+            return assets.reduce((collection, asset) => {
+                // separate assets by type
+                // add them to the collection
 
-      const collectionIncludes = Object.keys(collection).includes(type);
-      if (!collectionIncludes) { collection[type] = {} }
+                const { type, key, value } = asset;
 
-      collection[type][key] = value;
-      return collection;
-    }, {});
-  })
-  .catch((err) => {
-    console.error(err.message, err);
-  });
+                const collectionIncludes = Object.keys(collection).includes(type);
+                if (!collectionIncludes) { collection[type] = {} }
+
+                collection[type][key] = value;
+                return collection;
+            }, {});
+        })
 }
 
 const loadImage = (key, url, isOptional) => {
-  let fallback = isOptional ? 
-  createBase64Image(blankImage) :
-  createBase64Image(defaultImage);
+    let fallback = isOptional ?
+        createBase64Image(blankImage) :
+        createBase64Image(defaultImage);
 
-  let result = { type: 'image', key: key, value: fallback };
-  if (!key || !url) { return result; }
+    let result = { type: 'image', key: key, value: fallback };
+    if (!key || !url) { return result; }
 
-  return new Promise((resolve) => {
-    let image = new Image;
-    image.src = url;
+    return new Promise((resolve) => {
+        let image = new Image;
+        image.src = url;
 
-    // loaded
-    image.onload = () => {
-      resolve({
-        ...result,
-        ...{ value: image }
-      });
-    };
+        // loaded
+        image.onload = () => {
+            resolve({
+                ...result,
+                ... { value: image }
+            });
+        };
 
-    // error
-    image.onerror = () => {
-      resolve({
-        ...result,
-        ...{ value: createBase64Image(defaultImage) }
-      });
-    };
-  });
+        // error
+        image.onerror = () => {
+            resolve({
+                ...result,
+                ... { value: createBase64Image(defaultImage) }
+            });
+        };
+    });
 
 }
 
 const loadSound = (key, url) => {
-  let result = { type: 'sound', key: key, value: null };
+    let result = { type: 'sound', key: key, value: null };
 
-  // check
-  if (!key || !url) { return result; }
+    // check
+    if (!key || !url) { return result; }
 
-  return new Promise((resolve, reject) => {
-    let sound = new Audio(url);
-
-    // loaded
-    sound.oncanplaythrough = () => {
-      resolve({...result, ...{ value: sound }});
-    };
-
-    // error
-    sound.onerror = () => {
-      reject(result);
-    };
-
-    sound.load(); // for iphones
-  });
+    return new Promise((resolve, reject) => {
+        audioBufferLoader(url)
+            .then((sound) => {
+                resolve({...result, ... { value: sound } });
+            })
+            .catch((err) => {
+                reject(err);
+            })
+    });
 }
 
 const loadFont = (key, fontName) => {
-  let result = { type: 'font', key: key, value: null };
+    let result = { type: 'font', key: key, value: null };
 
-  // check
-  if (!key || !fontName) { return result; }
+    // check
+    if (!key || !fontName) { return result; }
 
-  return new Promise((resolve) => {
-    const font = {
-      google: {
-        families: [fontName]
-      },
-      fontactive: function (familyName) {
-        resolve({...result, ...{ value: familyName }});
-      }
-    }
-    WebFont.load(font);
-  });
+    return new Promise((resolve) => {
+        const font = {
+            google: {
+                families: [fontName]
+            },
+            fontactive: function(familyName) {
+                resolve({...result, ... { value: familyName } });
+            }
+        }
+        WebFont.load(font);
+    });
 }
 
 export { loadList, loadImage, loadSound, loadFont };
