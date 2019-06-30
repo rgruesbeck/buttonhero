@@ -89,7 +89,7 @@ class Game {
 
         // restart game loop after tab unfocused
         // window.addEventListener('blur', () => this.requestFrame(() => this.play()));
-        
+
         // handle koji config changes
         Koji.on('change', (scope, key, value) => {
             this.config[scope][key] = value;
@@ -148,7 +148,7 @@ class Game {
                 }
 
                 // set lanes
-                acc[key].lane = Object.keys(acc).length - 1; 
+                acc[key].lane = Object.keys(acc).length - 1;
 
                 return acc;
             }, {});
@@ -212,7 +212,7 @@ class Game {
 
     load() {
         // load pictures, sounds, and fonts
-    
+
         if (this.sounds && this.sounds.backgroundMusic) { this.sounds.backgroundMusic.pause(); } // stop background music when re-loading
 
         this.init();
@@ -227,18 +227,18 @@ class Game {
 
         // make a list of button image assets
         const buttonImages = Object.entries(this.buttons)
-        .map(entry => entry[1])
-        .map(button => loadImage(button.image.key, button.image.value));
+            .map(entry => entry[1])
+            .map(button => loadImage(button.image.key, button.image.value));
 
         // put the loaded assets the respective containers
         loadList([...gameAssets, ...buttonImages])
-        .then((assets) => {
+            .then((assets) => {
 
-            this.images = assets.image;
-            this.sounds = assets.sound;
+                this.images = assets.image;
+                this.sounds = assets.sound;
 
-        })
-        .then(() => this.create());
+            })
+            .then(() => this.create());
     }
 
     create() {
@@ -280,12 +280,14 @@ class Game {
         this.setState({
             current: 'ready',
             keyMap: this.goals.map((g) => `
-                <div style="display: flex; align-items: center; justify-content: center; max-height: 100px; margin: 0.25em;">
+                <div id="desktop-instructions-item">
                     <img 
+                        id="desktop-instructions-image"
                         src="${g.image.src}"
-                        style="height: 100%;"
                     />
-                    <span style="margin: 8px;">${g.meta.keycode.replace(/Digit|Key/, '')}</span>
+                    <span id="desktop-instructions-span">
+                        ${g.meta.keycode.replace(/Digit|Key/, '')}
+                    </span>
                 </div>
             `)
         });
@@ -297,7 +299,7 @@ class Game {
         // update game characters
 
         // clear the screen of the last picture
-        this.ctx.fillStyle = this.config.colors.backgroundColor; 
+        this.ctx.fillStyle = this.config.colors.backgroundColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // draw and do stuff that you need to do
@@ -316,16 +318,15 @@ class Game {
                 this.overlay.setButton(this.config.settings.startText);
                 this.overlay.setInstructions({
                     desktop: `
-                        ${this.config.settings.instructionsDesktop}
-                        <div style="display: flex; flex-direction: column; height: 40vh;">
-                            ${this.state.keyMap.join('')}
+                        <div class="desktop">
+                            ${this.config.settings.instructionsDesktop}
+                            <div>
+                                ${this.state.keyMap.join('')}
+                            </div>
                         </div>
                     `,
                     mobile: this.config.settings.instructionsMobile
                 });
-
-                 //   desktop: this.config.settings.instructionsDesktop
-                 //   .concat(this.state.keyMap.join('')),
 
                 this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
@@ -394,7 +395,7 @@ class Game {
                 if (!effect.active) {
                     this.effects.splice(i, 1);
                 }
-                
+
             }
 
 
@@ -409,7 +410,7 @@ class Game {
                 if (button.y > this.screen.bottom) {
                     this.entities.splice(i, 1);
                 }
-                
+
             }
 
             // update and draw goals
@@ -445,7 +446,7 @@ class Game {
                 if (!effect.active) {
                     this.effects.splice(i, 1);
                 }
-                
+
             }
 
             if (!this.effects.length) {
@@ -546,7 +547,7 @@ class Game {
         }
 
         // button
-        if ( target.id === 'button') {
+        if (target.id === 'button') {
             // if defaulting to have sound on by default
             // double mute() to warmup iphone audio here
             this.mute();
@@ -561,7 +562,7 @@ class Game {
         if (type === 'keydown' && this.state.current === 'play') {
             // get goal matching keycode
             let goal = this.goals
-            .find(g => g.meta.keycode === code);
+                .find(g => g.meta.keycode === code);
 
             // check goal attempt
             goal && this.checkGoalAttempt(goal);
@@ -676,7 +677,7 @@ class Game {
     setState(state) {
         this.state = {
             ...this.state,
-            ...{ prev: this.state.current },
+            ... { prev: this.state.current },
             ...state,
         };
     }

@@ -60,9 +60,15 @@ canvas {
 }
 
 @keyframes button {
-    0% { transform: scale(1, 1) }
-    50% { transform: scale(0.85,0.85) }
-    100% { transform: scale(1,1) }
+    0% {
+        transform: scale(1, 1)
+    }
+    50% {
+        transform: scale(0.85, 0.85)
+    }
+    100% {
+        transform: scale(1, 1)
+    }
 }
 
 .container #loading {
@@ -98,14 +104,16 @@ canvas {
 }
 
 .container #button:hover {
-    background-color: rgba(255, 255, 255,0.5);
+    background-color: rgba(255, 255, 255, 0.5);
 }
+
 
 /*
     fix for safari:
     event is intercepted from bubbling up
     for updated elements. see setButton methods in overlay.js
 */
+
 .container #buttonspan {
     pointer-events: none;
 }
@@ -119,6 +127,41 @@ canvas {
     border-radius: 100px;
     text-align: center;
     transition: opacity 1s;
+}
+
+
+/*
+    desktop instructions
+    // container
+    // item display: flex; align-items: center; justify-content: center; max-height: 100px; margin: 0.25em;
+    // item: image height: 100%;
+    // item: span margin: 8px;
+*/
+
+.container #instructions .desktop div {
+    display: flex;
+    flex-direction: column;
+    height: 40vh;
+}
+
+
+/* <div id="desktop-instruction-item"> */
+
+.container #instructions #desktop-instructions-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    max-height: 100px;
+    margin: 0.25em;
+}
+
+.container #instructions #desktop-instructions-image {
+    height: 100%;
+}
+
+.container #instructions #desktop-instructions-span {
+    margin: 8px;
 }
 
 .container .bar {
@@ -194,6 +237,7 @@ canvas {
     font-size: 1.5em;
 }
 
+
 /*!
  * Load Awesome v1.1.0 (http://github.danielcardoso.net/load-awesome/)
  * Copyright 2015 Daniel Cardoso <@DanielCardoso>
@@ -201,31 +245,36 @@ canvas {
 */
 
 .la-ball-clip-rotate,
-.la-ball-clip-rotate > div {
+.la-ball-clip-rotate>div {
     position: relative;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
-            box-sizing: border-box;
+    box-sizing: border-box;
 }
+
 .la-ball-clip-rotate {
     display: block;
     font-size: 0;
     color: #fff;
 }
+
 .la-ball-clip-rotate.la-dark {
     color: #333;
 }
-.la-ball-clip-rotate > div {
+
+.la-ball-clip-rotate>div {
     display: inline-block;
     float: none;
     background-color: currentColor;
     border: 0 solid currentColor;
 }
+
 .la-ball-clip-rotate {
     width: 32px;
     height: 32px;
 }
-.la-ball-clip-rotate > div {
+
+.la-ball-clip-rotate>div {
     width: 32px;
     height: 32px;
     background: transparent;
@@ -234,67 +283,78 @@ canvas {
     border-radius: 100%;
     -webkit-animation: ball-clip-rotate .75s linear infinite;
     -moz-animation: ball-clip-rotate .75s linear infinite;
-        -o-animation: ball-clip-rotate .75s linear infinite;
-            animation: ball-clip-rotate .75s linear infinite;
+    -o-animation: ball-clip-rotate .75s linear infinite;
+    animation: ball-clip-rotate .75s linear infinite;
 }
+
 .la-ball-clip-rotate.la-sm {
     width: 16px;
     height: 16px;
 }
-.la-ball-clip-rotate.la-sm > div {
+
+.la-ball-clip-rotate.la-sm>div {
     width: 16px;
     height: 16px;
     border-width: 1px;
 }
+
 .la-ball-clip-rotate.la-2x {
     width: 64px;
     height: 64px;
 }
-.la-ball-clip-rotate.la-2x > div {
+
+.la-ball-clip-rotate.la-2x>div {
     width: 64px;
     height: 64px;
     border-width: 4px;
 }
+
 .la-ball-clip-rotate.la-3x {
     width: 96px;
     height: 96px;
 }
-.la-ball-clip-rotate.la-3x > div {
+
+.la-ball-clip-rotate.la-3x>div {
     width: 96px;
     height: 96px;
     border-width: 6px;
 }
+
+
 /*
 * Animation
 */
+
 @-webkit-keyframes ball-clip-rotate {
     0% {
         -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
+        transform: rotate(0deg);
     }
     50% {
         -webkit-transform: rotate(180deg);
-                transform: rotate(180deg);
+        transform: rotate(180deg);
     }
     100% {
         -webkit-transform: rotate(360deg);
-                transform: rotate(360deg);
+        transform: rotate(360deg);
     }
 }
+
 @-moz-keyframes ball-clip-rotate {
     0% {
         -moz-transform: rotate(0deg);
-            transform: rotate(0deg);
+        transform: rotate(0deg);
     }
     50% {
         -moz-transform: rotate(180deg);
-            transform: rotate(180deg);
+        transform: rotate(180deg);
     }
     100% {
         -moz-transform: rotate(360deg);
-            transform: rotate(360deg);
+        transform: rotate(360deg);
     }
 }
+
 @-o-keyframes ball-clip-rotate {
     0% {
         -o-transform: rotate(0deg);
@@ -309,23 +369,24 @@ canvas {
         transform: rotate(360deg);
     }
 }
+
 @keyframes ball-clip-rotate {
     0% {
         -webkit-transform: rotate(0deg);
         -moz-transform: rotate(0deg);
-            -o-transform: rotate(0deg);
-                transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
     }
     50% {
         -webkit-transform: rotate(180deg);
         -moz-transform: rotate(180deg);
-            -o-transform: rotate(180deg);
-                transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        transform: rotate(180deg);
     }
     100% {
         -webkit-transform: rotate(360deg);
         -moz-transform: rotate(360deg);
-            -o-transform: rotate(360deg);
-                transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
     }
 }
