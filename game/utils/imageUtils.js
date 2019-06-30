@@ -16,6 +16,16 @@
  * 
  */
 
+// create image from data uri
+const createBase64Image = (dataUri) => {
+    return [dataUri]
+    .map(uri => {
+        let image = new Image();
+        image.src = uri;
+        return image;
+    }).reduce(img => img);
+}
+
 // resize image by width
 const resizeByWidth = (width, naturalWidth, naturalHeight) => {
     // cross multiply to get new height
@@ -78,5 +88,6 @@ const resize = ({ image, width, height }) => {
 };
 
 export {
-    resize
+    resize,
+    createBase64Image
 };

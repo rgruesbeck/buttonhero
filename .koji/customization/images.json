@@ -12,7 +12,7 @@
         {
           "key": "backgroundImage",
           "name": "Background Image",
-          "description": "Background image",
+          "description": "Background image: optional",
           "type": "image"
         }
       ]

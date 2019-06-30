@@ -55,6 +55,8 @@
  */
 
 import WebFont from 'webfontloader';
+import { createBase64Image } from '../utils/imageUtils.js';
+import { blankImage, defaultImage } from './placeholders.js';
 
 const loadList = (list) => {
   return Promise.all(list)
@@ -72,26 +74,37 @@ const loadList = (list) => {
       return collection;
     }, {});
   })
+  .catch((err) => {
+    console.error(err.message, err);
+  });
 }
 
-const loadImage = (key, url) => {
-  let result = { type: 'image', key: key, value: null };
+const loadImage = (key, url, isOptional) => {
+  let fallback = isOptional ? 
+  createBase64Image(blankImage) :
+  createBase64Image(defaultImage);
 
-  // check
+  let result = { type: 'image', key: key, value: fallback };
   if (!key || !url) { return result; }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let image = new Image;
     image.src = url;
 
     // loaded
     image.onload = () => {
-      resolve({...result, ...{ value: image }});
+      resolve({
+        ...result,
+        ...{ value: image }
+      });
     };
 
     // error
     image.onerror = () => {
-      reject(result);
+      resolve({
+        ...result,
+        ...{ value: createBase64Image(defaultImage) }
+      });
     };
   });
 

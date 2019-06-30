@@ -219,7 +219,7 @@ class Game {
 
         // make a list of assets
         const gameAssets = [
-            loadImage('backgroundImage', this.config.images.backgroundImage),
+            loadImage('backgroundImage', this.config.images.backgroundImage, true),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadSound('successSound', this.config.sounds.successSound),
             loadFont('gameFont', this.config.settings.fontFamily)
