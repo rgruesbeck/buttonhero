@@ -56,6 +56,9 @@ import {
     Burn
 } from './objects/effects.js';
 
+import audioContext from 'audio-context';
+import audioPlayback from 'audio-play';
+
 import Button from './characters/button.js';
 
 class Game {
@@ -71,6 +74,8 @@ class Game {
 
         this.canvas = canvas; // game screen
         this.ctx = canvas.getContext("2d"); // game screen context
+
+        this.audioCtx = audioContext();
 
         // setup event listeners
         // handle keyboard events
@@ -213,7 +218,10 @@ class Game {
     load() {
         // load pictures, sounds, and fonts
 
-        if (this.sounds && this.sounds.backgroundMusic) { this.sounds.backgroundMusic.pause(); } // stop background music when re-loading
+        // pause background music on restart
+        if (this.sounds && this.sounds.backgroundMusic) {
+            // this.sounds.backgroundMusic.pause();
+        }
 
         this.init();
 
@@ -359,7 +367,15 @@ class Game {
 
             this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
-            if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
+            if (!this.state.muted && !this.state.backgroundMusic) {
+                let sound = this.sounds.backgroundMusic;
+                this.state.backgroundMusic = audioPlayback(sound, {
+                    start: 0,
+                    end: sound.duration,
+                    loop: true,
+                    context: this.audioCtx
+                });
+            }
 
             // add a button
             if (this.frame.count % 120 === 0 || this.entities.length < 5) {
@@ -414,9 +430,14 @@ class Game {
                 button.move(0, 1, this.frame.scale);
                 button.draw();
 
-                // remove off-screen buttons
                 if (button.y > this.screen.bottom) {
+                    // remove off-screen buttons
                     this.entities.splice(i, 1);
+
+                    // remove points from powerbar
+                    this.setState({
+                        power: Math.min(this.state.power - (this.state.power / 50), 100) // remove power
+                    })
                 }
 
             }
@@ -500,8 +521,12 @@ class Game {
                 this.animateSuccess(goal);
 
                 // play success sound
-                this.sounds.successSound.currentTime = 0;
-                this.sounds.successSound.play();
+                let sound = this.sounds.successSound;
+                audioPlayback(sound, {
+                    start: 0,
+                    end: sound.duration,
+                    context: this.audioCtx
+                });
 
             } else {
                 // remove points from powerbar
@@ -624,10 +649,7 @@ class Game {
             this.cancelFrame(this.frame.count - 1);
 
             // mute all game sounds
-            Object.keys(this.sounds).forEach((key) => {
-                this.sounds[key].muted = true;
-                this.sounds[key].pause();
-            });
+            this.audioCtx.suspend();
 
             this.overlay.setBanner('Paused');
         } else {
@@ -636,10 +658,7 @@ class Game {
 
             // resume game sounds if game not muted
             if (!this.state.muted) {
-                Object.keys(this.sounds).forEach((key) => {
-                    this.sounds[key].muted = false;
-                    this.sounds.backgroundMusic.play();
-                });
+                this.audioCtx.resume();
             }
 
             this.overlay.hide('banner');
@@ -659,19 +678,11 @@ class Game {
 
         if (this.state.muted) {
             // mute all game sounds
-            Object.keys(this.sounds).forEach((key) => {
-                this.sounds[key].muted = true;
-                this.sounds[key].pause();
-            });
+            this.audioCtx.suspend();
         } else {
             // unmute all game sounds
-            // and play background music
-            // if game not paused
             if (!this.state.paused) {
-                Object.keys(this.sounds).forEach((key) => {
-                    this.sounds[key].muted = false;
-                    this.sounds.backgroundMusic.play();
-                });
+                this.audioCtx.resume();
             }
         }
     }

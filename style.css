@@ -146,10 +146,12 @@ canvas {
 
 .container #instructions #desktop-instructions-image {
     height: 100%;
+    max-height: 100%;
+    width: auto;
 }
 
 .container #instructions #desktop-instructions-span {
-    margin: 8px;
+    margin: 10px;
 }
 
 .container .bar {
