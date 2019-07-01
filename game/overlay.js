@@ -29,6 +29,7 @@ class Overlay {
         this.container = node.querySelector('.container');
 
         this.loading = node.querySelector('#loading');
+        this.progress = node.querySelector('#loading-progress');
         this.banner = node.querySelector('#banner');
         this.button = node.querySelector('#button');
         this.instructions = node.querySelector('#instructions');
@@ -43,6 +44,10 @@ class Overlay {
         this.styles = {};
     }
 
+    setProgress(message) {
+        this.progress.textContent = message;
+    }
+
     setBanner(message) {
         this.banner.textContent = message;
         this.show('banner');
@@ -55,7 +60,7 @@ class Overlay {
     }
 
     setInstructions({ desktop, mobile }) {
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
             // show mobile instructions
 
             this.instructions.innerHTML = mobile;
@@ -115,7 +120,7 @@ class Overlay {
     }
 
     setStyles(styles) {
-        this.styles = { ...this.styles, ...styles };
+        this.styles = {...this.styles, ...styles };
         this.applyStyles();
     }
 

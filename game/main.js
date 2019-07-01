@@ -56,6 +56,9 @@ import {
     Burn
 } from './objects/effects.js';
 
+import audioContext from 'audio-context';
+import audioPlayback from 'audio-play';
+
 import Button from './characters/button.js';
 
 class Game {
@@ -71,6 +74,8 @@ class Game {
 
         this.canvas = canvas; // game screen
         this.ctx = canvas.getContext("2d"); // game screen context
+
+        this.audioCtx = audioContext();
 
         // setup event listeners
         // handle keyboard events
@@ -89,7 +94,7 @@ class Game {
 
         // restart game loop after tab unfocused
         // window.addEventListener('blur', () => this.requestFrame(() => this.play()));
-        
+
         // handle koji config changes
         Koji.on('change', (scope, key, value) => {
             this.config[scope][key] = value;
@@ -148,7 +153,7 @@ class Game {
                 }
 
                 // set lanes
-                acc[key].lane = Object.keys(acc).length - 1; 
+                acc[key].lane = Object.keys(acc).length - 1;
 
                 return acc;
             }, {});
@@ -212,8 +217,11 @@ class Game {
 
     load() {
         // load pictures, sounds, and fonts
-    
-        if (this.sounds && this.sounds.backgroundMusic) { this.sounds.backgroundMusic.pause(); } // stop background music when re-loading
+
+        // pause background music on restart
+        if (this.sounds && this.sounds.backgroundMusic) {
+            // this.sounds.backgroundMusic.pause();
+        }
 
         this.init();
 
@@ -227,18 +235,27 @@ class Game {
 
         // make a list of button image assets
         const buttonImages = Object.entries(this.buttons)
-        .map(entry => entry[1])
-        .map(button => loadImage(button.image.key, button.image.value));
+            .map(entry => entry[1])
+            .map(button => loadImage(button.image.key, button.image.value));
 
         // put the loaded assets the respective containers
-        loadList([...gameAssets, ...buttonImages])
-        .then((assets) => {
+        loadList(
+                [...gameAssets, ...buttonImages],
+                (progress) => {
+                    console.log('progress', progress);
+                    this.overlay.setProgress(`${progress.percent}%`);
+                })
+            .then((assets) => {
+                console.log('done', assets);
 
-            this.images = assets.image;
-            this.sounds = assets.sound;
+                // attach assets
+                this.images = assets.image;
+                this.sounds = assets.sound;
 
-        })
-        .then(() => this.create());
+                // create
+                this.create();
+            })
+            .catch(err => console.error(err));
     }
 
     create() {
@@ -280,12 +297,14 @@ class Game {
         this.setState({
             current: 'ready',
             keyMap: this.goals.map((g) => `
-                <div style="display: flex; align-items: center; justify-content: center; max-height: 100px; margin: 0.25em;">
+                <div id="desktop-instructions-item">
                     <img 
+                        id="desktop-instructions-image"
                         src="${g.image.src}"
-                        style="height: 100%;"
                     />
-                    <span style="margin: 8px;">${g.meta.keycode.replace(/Digit|Key/, '')}</span>
+                    <span id="desktop-instructions-span">
+                        ${g.meta.keycode.replace(/Digit|Key/, '')}
+                    </span>
                 </div>
             `)
         });
@@ -297,7 +316,7 @@ class Game {
         // update game characters
 
         // clear the screen of the last picture
-        this.ctx.fillStyle = this.config.colors.backgroundColor; 
+        this.ctx.fillStyle = this.config.colors.backgroundColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // draw and do stuff that you need to do
@@ -316,16 +335,15 @@ class Game {
                 this.overlay.setButton(this.config.settings.startText);
                 this.overlay.setInstructions({
                     desktop: `
-                        ${this.config.settings.instructionsDesktop}
-                        <div style="display: flex; flex-direction: column; height: 40vh;">
-                            ${this.state.keyMap.join('')}
+                        <div class="desktop">
+                            ${this.config.settings.instructionsDesktop}
+                            <div>
+                                ${this.state.keyMap.join('')}
+                            </div>
                         </div>
                     `,
                     mobile: this.config.settings.instructionsMobile
                 });
-
-                 //   desktop: this.config.settings.instructionsDesktop
-                 //   .concat(this.state.keyMap.join('')),
 
                 this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
@@ -350,7 +368,15 @@ class Game {
 
             this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
-            if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
+            if (!this.state.muted && !this.state.backgroundMusic) {
+                let sound = this.sounds.backgroundMusic;
+                this.state.backgroundMusic = audioPlayback(sound, {
+                    start: 0,
+                    end: sound.duration,
+                    loop: true,
+                    context: this.audioCtx
+                });
+            }
 
             // add a button
             if (this.frame.count % 120 === 0 || this.entities.length < 5) {
@@ -394,7 +420,7 @@ class Game {
                 if (!effect.active) {
                     this.effects.splice(i, 1);
                 }
-                
+
             }
 
 
@@ -405,11 +431,16 @@ class Game {
                 button.move(0, 1, this.frame.scale);
                 button.draw();
 
-                // remove off-screen buttons
                 if (button.y > this.screen.bottom) {
+                    // remove off-screen buttons
                     this.entities.splice(i, 1);
+
+                    // remove points from powerbar
+                    this.setState({
+                        power: Math.min(this.state.power - (this.state.power / 50), 100) // remove power
+                    })
                 }
-                
+
             }
 
             // update and draw goals
@@ -445,7 +476,7 @@ class Game {
                 if (!effect.active) {
                     this.effects.splice(i, 1);
                 }
-                
+
             }
 
             if (!this.effects.length) {
@@ -491,8 +522,12 @@ class Game {
                 this.animateSuccess(goal);
 
                 // play success sound
-                this.sounds.successSound.currentTime = 0;
-                this.sounds.successSound.play();
+                let sound = this.sounds.successSound;
+                audioPlayback(sound, {
+                    start: 0,
+                    end: sound.duration,
+                    context: this.audioCtx
+                });
 
             } else {
                 // remove points from powerbar
@@ -546,7 +581,7 @@ class Game {
         }
 
         // button
-        if ( target.id === 'button') {
+        if (target.id === 'button') {
             // if defaulting to have sound on by default
             // double mute() to warmup iphone audio here
             this.mute();
@@ -561,7 +596,7 @@ class Game {
         if (type === 'keydown' && this.state.current === 'play') {
             // get goal matching keycode
             let goal = this.goals
-            .find(g => g.meta.keycode === code);
+                .find(g => g.meta.keycode === code);
 
             // check goal attempt
             goal && this.checkGoalAttempt(goal);
@@ -615,10 +650,7 @@ class Game {
             this.cancelFrame(this.frame.count - 1);
 
             // mute all game sounds
-            Object.keys(this.sounds).forEach((key) => {
-                this.sounds[key].muted = true;
-                this.sounds[key].pause();
-            });
+            this.audioCtx.suspend();
 
             this.overlay.setBanner('Paused');
         } else {
@@ -627,10 +659,7 @@ class Game {
 
             // resume game sounds if game not muted
             if (!this.state.muted) {
-                Object.keys(this.sounds).forEach((key) => {
-                    this.sounds[key].muted = false;
-                    this.sounds.backgroundMusic.play();
-                });
+                this.audioCtx.resume();
             }
 
             this.overlay.hide('banner');
@@ -650,19 +679,11 @@ class Game {
 
         if (this.state.muted) {
             // mute all game sounds
-            Object.keys(this.sounds).forEach((key) => {
-                this.sounds[key].muted = true;
-                this.sounds[key].pause();
-            });
+            this.audioCtx.suspend();
         } else {
             // unmute all game sounds
-            // and play background music
-            // if game not paused
             if (!this.state.paused) {
-                Object.keys(this.sounds).forEach((key) => {
-                    this.sounds[key].muted = false;
-                    this.sounds.backgroundMusic.play();
-                });
+                this.audioCtx.resume();
             }
         }
     }
@@ -676,7 +697,7 @@ class Game {
     setState(state) {
         this.state = {
             ...this.state,
-            ...{ prev: this.state.current },
+            ... { prev: this.state.current },
             ...state,
         };
     }
