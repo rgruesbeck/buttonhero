@@ -260,15 +260,19 @@ canvas {
 }
 
 .la-ball-clip-rotate {
-    width: 32px;
-    height: 32px;
+    position: relative;
+    width: 96px;
+    height: 96px;
 }
 
 .la-ball-clip-rotate>div {
-    width: 32px;
-    height: 32px;
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    top: -24px;
+    left: -24px;
     background: transparent;
-    border-width: 2px;
+    border-width: 4px;
     border-bottom-color: transparent;
     border-radius: 100%;
     -webkit-animation: ball-clip-rotate .75s linear infinite;
@@ -277,37 +281,11 @@ canvas {
     animation: ball-clip-rotate .75s linear infinite;
 }
 
-.la-ball-clip-rotate.la-sm {
-    width: 16px;
-    height: 16px;
-}
-
-.la-ball-clip-rotate.la-sm>div {
-    width: 16px;
-    height: 16px;
-    border-width: 1px;
-}
-
-.la-ball-clip-rotate.la-2x {
+.la-ball-clip-rotate>span {
+    font-size: 24px;
     width: 64px;
-    height: 64px;
-}
-
-.la-ball-clip-rotate.la-2x>div {
-    width: 64px;
-    height: 64px;
-    border-width: 4px;
-}
-
-.la-ball-clip-rotate.la-3x {
-    width: 96px;
-    height: 96px;
-}
-
-.la-ball-clip-rotate.la-3x>div {
-    width: 96px;
-    height: 96px;
-    border-width: 6px;
+    height: 64x;
+    background: transparent;
 }
 
 

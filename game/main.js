@@ -243,6 +243,7 @@ class Game {
                 [...gameAssets, ...buttonImages],
                 (progress) => {
                     console.log('progress', progress);
+                    this.overlay.setProgress(`${progress.percent}%`);
                 })
             .then((assets) => {
                 console.log('done', assets);
