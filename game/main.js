@@ -203,6 +203,8 @@ class Game {
             right: this.canvas.width,
             centerX: this.canvas.width / 2,
             centerY: this.canvas.height / 2,
+            width: this.canvas.width,
+            height: this.canvas.height,
             scale: ((this.canvas.width + this.canvas.height) / 2) * 0.003
         };
 
@@ -227,7 +229,10 @@ class Game {
 
         // make a list of assets
         const gameAssets = [
-            loadImage('backgroundImage', this.config.images.backgroundImage, true),
+            loadImage('backgroundImage', this.config.images.backgroundImage, {
+                optional: true,
+                params: `fit=max&w=${this.screen.width}&h=${this.screen.height}auto=compress`
+            }),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadSound('successSound', this.config.sounds.successSound),
             loadFont('gameFont', this.config.settings.fontFamily)
@@ -235,8 +240,10 @@ class Game {
 
         // make a list of button image assets
         const buttonImages = Object.entries(this.buttons)
-            .map(entry => entry[1])
-            .map(button => loadImage(button.image.key, button.image.value));
+            .map((entry) => entry[1])
+            .map((button, idx, arr) => loadImage(button.image.key, button.image.value, {
+                params: `fit=max&w=${this.screen.width / arr.length}&h=${this.screen.height / arr.length}auto=compress`
+            }));
 
         // put the loaded assets the respective containers
         loadList(
@@ -246,7 +253,6 @@ class Game {
                     this.overlay.setProgress(`${progress.percent}%`);
                 })
             .then((assets) => {
-                console.log('done', assets);
 
                 // attach assets
                 this.images = assets.image;
@@ -280,7 +286,8 @@ class Game {
                     goal: true,
                     meta: {
                         lane: button.lane,
-                        keycode: button.keycode.value
+                        keycode: button.keycode.value,
+                        imagekey: button.image.key
                     },
                     ctx: this.ctx,
                     image: image,
@@ -297,12 +304,13 @@ class Game {
         this.setState({
             current: 'ready',
             keyMap: this.goals.map((g) => `
-                <div id="desktop-instructions-item">
+                <div class="desktop-instructions-item">
                     <img 
-                        id="desktop-instructions-image"
+                        class="desktop-instructions-image"
+                        alt="${g.meta.imagekey}"
                         src="${g.image.src}"
                     />
-                    <span id="desktop-instructions-span">
+                    <span class="desktop-instructions-span">
                         ${g.meta.keycode.replace(/Digit|Key/, '')}
                     </span>
                 </div>

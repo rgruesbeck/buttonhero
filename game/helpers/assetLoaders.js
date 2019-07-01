@@ -90,8 +90,8 @@ const loadList = (list, progress) => {
         })
 }
 
-const loadImage = (key, url, isOptional) => {
-    let fallback = isOptional ?
+const loadImage = (key, url, opts) => {
+    let fallback = opts && opts.optional ?
         createBase64Image(blankImage) :
         createBase64Image(defaultImage);
 
@@ -100,14 +100,27 @@ const loadImage = (key, url, isOptional) => {
 
     return new Promise((resolve) => {
         let image = new Image;
-        image.src = url;
+        image.src = opts && opts.params ?
+        `${url}?${opts.params}` :
+        url;
 
         // loaded
         image.onload = () => {
-            resolve({
-                ...result,
-                ... { value: image }
-            });
+            image.decode()
+            .then(() => {
+                resolve({
+                    ...result,
+                    ... { value: image }
+                });
+            })
+            .catch((err) => {
+                console.error(err);
+
+                resolve({
+                    ...result,
+                    ... { value: createBase64Image(defaultImage) }
+                });
+            })
         };
 
         // error
