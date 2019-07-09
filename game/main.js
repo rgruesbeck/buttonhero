@@ -417,21 +417,6 @@ class Game {
                 }
             }
 
-            // update and draw effects
-            for (let i = 0; i < this.effects.length; i++) {
-                let effect = this.effects[i];
-
-                // run effect tick
-                effect.tick(this.frame.count);
-
-                // remove in-active effects
-                if (!effect.active) {
-                    this.effects.splice(i, 1);
-                }
-
-            }
-
-
             // update and draw buttons
             for (let i = 0; i < this.entities.length; i++) {
                 const button = this.entities[i];
@@ -457,6 +442,20 @@ class Game {
 
                 // draw goal
                 goalButton.draw();
+            }
+
+            // update and draw effects
+            for (let i = 0; i < this.effects.length; i++) {
+                let effect = this.effects[i];
+
+                // run effect tick
+                effect.tick(this.frame.count);
+
+                // remove in-active effects
+                if (!effect.active) {
+                    this.effects.splice(i, 1);
+                }
+
             }
 
 

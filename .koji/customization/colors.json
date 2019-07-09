@@ -1,10 +1,10 @@
 {
   "colors": {
-    "textColor": "#FFF1c0",
-    "primaryColor": "#494373",
-    "sparkColor": "#FFF1c0",
-    "burnColor": "#FFF1c0",
-    "backgroundColor": "#494373"
+    "textColor": "#ffc400",
+    "primaryColor": "#0091ea",
+    "sparkColor": "#f7fbfe",
+    "burnColor": "#b6d2e0",
+    "backgroundColor": "#000000"
   },
   "@@editor": [
     {

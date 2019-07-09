@@ -152,7 +152,7 @@ function Burn({ ctx, x, y, width = 25, color, burnRate = 100 }) {
             let wave = this.waves[i];
 
             // draw waves
-            wave.rd = Math.max(wave.rd - this.burnRate, 0);
+            wave.rd = Math.max(wave.rd + this.burnRate * 2, 0);
             wave.hue -= this.burnRate / 2;
             wave.width -= this.burnRate / 2;
             wave.alpha -= this.burnRate * 0.01;
