@@ -32,7 +32,7 @@ import {
     loadImage,
     loadSound,
     loadFont
-} from './helpers/assetLoaders.js';
+} from 'game-asset-loader';
 
 import {
     hashCode,
@@ -249,7 +249,6 @@ class Game {
         loadList(
                 [...gameAssets, ...buttonImages],
                 (progress) => {
-                    console.log('progress', progress);
                     this.overlay.setProgress(`${progress.percent}%`);
                 })
             .then((assets) => {
