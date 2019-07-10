@@ -19,7 +19,7 @@ import {
     valueOrRange
 } from '../utils/baseUtils.js';
 
-const praticleEmitter = ({ n = 1, x = 0, y = 0, vx = 1, vy = 1, rd = 2, hue = 0, alpha = 1 }) => {
+const praticleEmitter = ({ n = 1, x = 0, y = 0, vx = 1, vy = 1, rd = 2, hue = 0, sat = 100, light = 100, alpha = 1 }) => {
     return Array.apply(null, { length: n })
     .map(() => { return {
         x: valueOrRange(x),
@@ -28,11 +28,13 @@ const praticleEmitter = ({ n = 1, x = 0, y = 0, vx = 1, vy = 1, rd = 2, hue = 0,
         vy: valueOrRange(vy),
         rd: valueOrRange(rd),
         hue: valueOrRange(hue),
+        sat: valueOrRange(sat),
+        light: valueOrRange(light),
         alpha: valueOrRange(alpha)
     }; });
 }
 
-const radialWaveEmitter = ({ n = 1, x = 0, y = 0, rd = 2, width = 50, hue = 0, alpha = 1 }) => {
+const radialWaveEmitter = ({ n = 1, x = 0, y = 0, rd = 2, width = 50, hue = 0, sat = 100, light = 100, alpha = 1 }) => {
     return Array.apply(null, { length: n })
     .map(() => { return {
         x: valueOrRange(x),
@@ -40,6 +42,8 @@ const radialWaveEmitter = ({ n = 1, x = 0, y = 0, rd = 2, width = 50, hue = 0, a
         width: valueOrRange(width),
         rd: valueOrRange(rd),
         hue: valueOrRange(hue),
+        sat: valueOrRange(sat),
+        light: valueOrRange(light),
         alpha: valueOrRange(alpha)
     }; });
 }
@@ -47,7 +51,7 @@ const radialWaveEmitter = ({ n = 1, x = 0, y = 0, rd = 2, width = 50, hue = 0, a
 const drawParticle = (ctx, p) => {
     ctx.beginPath();
     ctx.arc(p.x >> 0, p.y >> 0, p.rd >> 0, 0, 2 * Math.PI, false);
-    ctx.fillStyle = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`;
+    ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${p.alpha})`;
     ctx.fill();
 }
 
@@ -55,7 +59,7 @@ const drawWave = (ctx, w) => {
     ctx.beginPath();
     ctx.arc(w.x >> 0, w.y >> 0, w.rd >> 0, 0, 2 * Math.PI);
     ctx.lineWidth = w.width;
-    ctx.strokeStyle = `hsla(${w.hue}, 100%, 50%, ${w.alpha})`;
+    ctx.strokeStyle = `hsla(${w.hue}, ${w.sat}%, ${w.light}%, ${w.alpha})`;
     ctx.stroke();
 }
 
@@ -79,7 +83,9 @@ function Spark({ ctx, n = 10, x, y, vx, vy, color, burnRate }) {
         vx: vx || [-10, 10],
         vy: vy || [-10, 10],
         rd: [1, 3],
-        hue: this.color.hsl[0]
+        hue: this.color.hsl[0],
+        sat: this.color.hsl[1],
+        light: this.color.hsl[2]
     });
 
     this.tick = (frame) => {
@@ -134,6 +140,8 @@ function Burn({ ctx, x, y, width = 25, color, burnRate = 100 }) {
         rd: 25,
         width: width,
         hue: this.color.hsl[0],
+        sat: this.color.hsl[1],
+        light: this.color.hsl[2],
         alpha: 1
     })
 
@@ -152,10 +160,10 @@ function Burn({ ctx, x, y, width = 25, color, burnRate = 100 }) {
             let wave = this.waves[i];
 
             // draw waves
-            wave.rd = Math.max(wave.rd + this.burnRate * 2, 0);
+            wave.rd = Math.max(wave.rd + this.burnRate * 5, 0);
             wave.hue -= this.burnRate / 2;
             wave.width -= this.burnRate / 2;
-            wave.alpha -= this.burnRate * 0.01;
+            wave.alpha -= this.burnRate * 0.1;
 
             // remove wave when larger than blast radius
             if (wave.alpha < 0) {

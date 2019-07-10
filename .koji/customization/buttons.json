@@ -1,12 +1,12 @@
 {
   "buttons": {
-    "button1Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/mushroom1.png",
+    "button1Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/thunder.png",
     "button1Key": "Digit7",
-    "button2Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/angrybirds.png",
+    "button2Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/comic.png",
     "button2Key": "Digit8",
-    "button3Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/ghost.png",
+    "button3Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/shield1.png",
     "button3Key": "Digit9",
-    "button4Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/r2d2.png",
+    "button4Image": "https://images.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/cape.png",
     "button4Key": "Digit0"
   },
   "@@editor": [

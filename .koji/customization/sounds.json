@@ -1,7 +1,6 @@
 {
   "sounds": {
-    "backgroundMusic": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroBackground2.mp3",
-    "successSound": "https://objects.koji-cdn.com/e5d1d25b-29a1-4df7-b9b7-534ae82f7bc2/buttonHeroSuccess2.mp3"
+    "backgroundMusic": "https://objects.koji-cdn.com/7c9ada1f-d7de-4bb7-a668-af9396d58cb7/background.mp3"
   },
   "@@editor": [
     {
@@ -14,12 +13,6 @@
           "key": "backgroundMusic",
           "name": "Background Music",
           "description": "Music to loop in background",
-          "type": "sound"
-        },
-        {
-          "key": "successSound",
-          "name": "Success Sound",
-          "description": "Sound when successful button hit",
           "type": "sound"
         }
       ]

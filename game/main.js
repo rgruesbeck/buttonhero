@@ -194,6 +194,10 @@ class Game {
         this.topbar.style.display = this.topbar.active ? 'block' : 'none';
         this.topbar.style.backgroundColor = this.config.colors.primaryColor;
 
+        // style text
+        document.querySelector('.container .center').style.textShadow = `2px 2px ${this.config.colors.secondaryColor}`
+        document.querySelector('#button').style.textShadow = `4px 4px ${this.config.colors.secondaryColor}`
+        document.querySelector('#banner').style.textShadow = `4px 4px ${this.config.colors.secondaryColor}`
 
         // set screen
         this.screen = {
@@ -234,15 +238,14 @@ class Game {
                 params: `fit=max&w=${this.screen.width}&h=${this.screen.height}auto=compress`
             }),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
-            loadSound('successSound', this.config.sounds.successSound),
             loadFont('gameFont', this.config.settings.fontFamily)
         ];
 
         // make a list of button image assets
         const buttonImages = Object.entries(this.buttons)
             .map((entry) => entry[1])
-            .map((button, idx, arr) => loadImage(button.image.key, button.image.value, {
-                params: `fit=max&w=${this.screen.width / arr.length}&h=${this.screen.height / arr.length}auto=compress`
+            .map((button) => loadImage(button.image.key, button.image.value, {
+                params: `fit=max&w=${this.state.laneSize}&h=${this.state.laneSize}auto=compress`
             }));
 
         // put the loaded assets the respective containers
@@ -500,17 +503,15 @@ class Game {
         // success when a goal
         // if goal is less than some distance from
         // a button of the same type
-        this.entities.forEach((target, index) => {
-            // valid target
-            let validTarget = target.meta.keycode === goal.meta.keycode;
-
+        this.entities.filter(ent => ent.lane === goal.lane)
+        .forEach((target, index) => {
             // within range
             let threshold = goal.height / 2; // within threshold when within 25%
             let range = Math.abs(goal.y - target.y);
             let withinRange = range < threshold;
 
             // handle hits
-            if (validTarget && withinRange) {
+            if (withinRange) {
 
                 // remove target
                 this.entities.splice(index, 1);
@@ -527,13 +528,6 @@ class Game {
                 // success feedback
                 this.animateSuccess(goal);
 
-                // play success sound
-                let sound = this.sounds.successSound;
-                audioPlayback(sound, {
-                    start: 0,
-                    end: sound.duration,
-                    context: this.audioCtx
-                });
 
             } else {
                 // remove points from powerbar
