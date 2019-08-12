@@ -11,3 +11,7 @@ dist
 
 # notes
 notes.txt
+
+# build folders
+frontend/dist
+backend/dist

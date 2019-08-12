@@ -181,6 +181,8 @@ class Game {
             touch: { x: 0, y: 0 },
         };
 
+        this.playlist = [];
+
         this.images = {}; // place to keep images
         this.sounds = {}; // place to keep sounds
         this.fonts = {}; // place to keep fonts
@@ -215,6 +217,7 @@ class Game {
 
         // set document body to backgroundColor
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
+        this.canvas.style.backgroundColor = this.config.colors.backgroundColor;
 
         // set loading indicator to textColor
         document.querySelector('#loading').style.color = this.config.colors.textColor;
@@ -223,11 +226,6 @@ class Game {
 
     load() {
         // load pictures, sounds, and fonts
-
-        // pause background music on restart
-        if (this.sounds && this.sounds.backgroundMusic) {
-            // this.sounds.backgroundMusic.pause();
-        }
 
         this.init();
 
@@ -270,10 +268,12 @@ class Game {
         // create game characters
 
         // set overlay styles
-        this.overlay.setStyles({
-            ...this.config.colors,
-            ...this.config.settings
-        });
+        if (this.overlay && this.config) {
+            this.overlay.setStyles({
+                ...this.config.colors,
+                ...this.config.settings
+            });
+        }
 
         // add goals
         this.goals = Object.entries(this.buttons)
@@ -379,10 +379,10 @@ class Game {
             this.overlay.setStats({ score: this.state.score, power: this.state.power });
 
             if (!this.state.muted && !this.state.backgroundMusic) {
-                let sound = this.sounds.backgroundMusic;
-                this.state.backgroundMusic = audioPlayback(sound, {
+                this.state.backgroundMusic = true;
+                this.playback('backgroundMusic', this.sounds.backgroundMusic, {
                     start: 0,
-                    end: sound.duration,
+                    end: this.sounds.backgroundMusic.duration,
                     loop: true,
                     context: this.audioCtx
                 });
@@ -432,7 +432,7 @@ class Game {
 
                     // remove points from powerbar
                     this.setState({
-                        power: Math.min(this.state.power - (this.state.power / 50), 100) // remove power
+                        power: Math.min(this.state.power - (this.state.power / 4), 100)
                     })
                 }
 
@@ -471,7 +471,6 @@ class Game {
 
         // game over
         if (this.state.current === 'over') {
-            // game over code
             this.overlay.setBanner(this.config.settings.gameoverText);
 
             // update and draw effects
@@ -488,14 +487,19 @@ class Game {
 
             }
 
-            if (!this.effects.length) {
-                this.load();
-            }
+            setTimeout(() => {
+                window.setScore(this.state.score);
+                window.setAppView('setScore');
+            }, 1000)
 
         }
 
         // draw the next screen
-        this.requestFrame(() => this.play());
+        if (this.state.current === 'stop') {
+            this.cancelFrame();
+        } else {
+            this.requestFrame(() => this.play());
+        }
     }
 
     // check hit
@@ -528,11 +532,10 @@ class Game {
                 // success feedback
                 this.animateSuccess(goal);
 
-
             } else {
                 // remove points from powerbar
                 this.setState({
-                    power: Math.min(this.state.power - (this.state.power / 50), 100) // remove power
+                    power: Math.min(this.state.power - (this.state.power / 4), 100) // remove power
                 })
             }
         });
@@ -635,7 +638,48 @@ class Game {
 
     handleResize() {
 
-        document.location.reload();
+        // document.location.reload();
+    }
+
+    // method:playback
+    playback(key, audioBuffer, options = {}) {
+        if (this.state.muted) { return; }
+
+        // add to playlist
+        let id = Math.random().toString(16).slice(2);
+        this.playlist.push({
+            id: id,
+            key: key,
+            playback: audioPlayback(audioBuffer, {
+                ...{
+                    start: 0,
+                    end: audioBuffer.duration,
+                    context: this.audioCtx
+                },
+                ...options
+            }, () => {
+                // remove played sound from playlist
+                this.playlist = this.playlist
+                    .filter(s => s.id != id);
+            })
+        });
+    }
+
+    // method:stopPlayBack
+    stopPlayback(key) {
+        this.playlist = this.playlist
+        .filter(s => {
+            let targetBuffer = s.key === key;
+            if (targetBuffer) {
+                s.playback.pause();
+            }
+            return targetBuffer;
+        })
+    }
+
+    stopPlaylist() {
+        this.playlist
+        .forEach(s => this.stopPlayback(s.key))
     }
 
     // pause game
@@ -720,6 +764,20 @@ class Game {
     // see game/helpers/animationframe.js for more information
     cancelFrame() {
         cancelAnimationFrame(this.frame.count);
+    }
+
+    destroy() {
+        // stop game loop and music
+        this.setState({ current: 'stop' })
+        this.stopPlaylist();
+
+        // cleanup event listeners
+        document.removeEventListener('keydown', this.handleKeyboardInput);
+        document.removeEventListener('keyup', this.handleKeyboardInput);
+        document.removeEventListener('touchstart', this.handleTap);
+        this.overlay.root.removeEventListener('click', this.handleClicks);
+        window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener("orientationchange", this.handleResize);
     }
 }
 

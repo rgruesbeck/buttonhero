@@ -1,46 +1,68 @@
 {
   "colors": {
     "textColor": "#ffdf47",
+    "lightTextColor": "#ffffff",
+    "darkTextColor": "#0f5d8a",
     "primaryColor": "#005ed3",
     "secondaryColor": "#ff0335",
+    "tertiaryColor": "#7fc8f1",
     "sparkColor": "#fff6c7",
     "burnColor": "#7fc8f1",
     "backgroundColor": "#000000"
   },
-  "@@editor": [
-    {
-      "key": "colors",
-      "name": "Colors",
-      "icon": "💅",
-      "source": "colors.json",
-      "fields": [
-        {
-          "key": "textColor",
-          "name": "Text color",
-          "description": "Default color for text",
-          "type": "color"
-        },
-        {
-          "key": "primaryColor",
-          "name": "Primary Color",
-          "type": "color"
-        },
-        {
-          "key": "sparkColor",
-          "name": "Spark Color",
-          "type": "color"
-        },
-        {
-          "key": "burnColor",
-          "name": "Burn Color",
-          "type": "color"
-        },
-        {
-          "key": "backgroundColor",
-          "name": "Background color",
-          "type": "color"
-        }
-      ]
-    }
-  ]
+  "@@editor": [{
+    "key": "colors",
+    "name": "Colors",
+    "icon": "💅",
+    "source": "colors.json",
+    "fields": [{
+        "key": "textColor",
+        "name": "Text color",
+        "description": "Default color for text",
+        "type": "color"
+      },
+      {
+        "key": "lightTextColor",
+        "name": "Light Text color",
+        "description": "Default color for light text",
+        "type": "color"
+      },
+      {
+        "key": "darkTextColor",
+        "name": "Dark Text color",
+        "description": "Default color for dark text",
+        "type": "color"
+      },
+      {
+        "key": "primaryColor",
+        "name": "Primary Color",
+        "type": "color"
+      },
+      {
+        "key": "secondaryColor",
+        "name": "Secondary Color",
+        "type": "color"
+      },
+      {
+        "key": "tertiaryColor",
+        "name": "Tertiary Color",
+        "type": "color"
+      },
+      {
+        "key": "sparkColor",
+        "name": "Spark Color",
+        "type": "color"
+      },
+      {
+        "key": "burnColor",
+        "name": "Burn Color",
+        "type": "color"
+      },
+      {
+        "key": "backgroundColor",
+        "name": "Background color",
+        "type": "color"
+      }
+    ]
+  }]
 }
