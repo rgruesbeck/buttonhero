@@ -145,6 +145,9 @@ class Game {
                 // allocate key
                 if (acc[key] === undefined) { acc[key] = {}; }
 
+                // set id
+                acc[key].id = cur.id;
+
                 // set keycode
                 if (cur.type === 'text') {
                     acc[key].keycode = {
@@ -397,18 +400,25 @@ class Game {
                 let shouldAdd = this.entities.length < this.state.maxButtons;
                 let shouldRecycle = this.entities.length >= this.state.maxButtons;
 
+                let duplicate = this.state.picked && this.state.picked === button.id;
+
+
                 // add new button
-                if (location.valid && shouldAdd) {
+                if (!duplicate && location.valid && shouldAdd) {
 
                     this.createButton({ button: button, location: location, list: this.entities });
                 }
 
                 // recycle a button
-                if (location.valid && shouldRecycle) {
+                if (!duplicate && location.valid && shouldRecycle) {
                     let entity = this.entities.find(r => !r.active);
+
 
                     this.recycleButton({ button: button, location: location, entity: entity });
                 }
+
+                // store picked button
+                this.setState({ picked: button.id });
             }
 
             // update and draw buttons
@@ -515,7 +525,7 @@ class Game {
     }
 
     recycleButton({ button, location, entity }) {
-        if (!button || !location || !entity) { return; }
+        if ([button, location, entity].includes(undefined)) { return; }
 
         // get imagesize
         let image = this.images[button.image.key]
