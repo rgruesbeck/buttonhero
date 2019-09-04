@@ -19,10 +19,13 @@ class ImageSprite extends Sprite {
         super(options);
 
         this.ctx = options.ctx;
-        this.image = options.image;
+        this.imageKey = options.imageKey;
     }
 
-    draw() {
+    draw(images) {
+        // ignore in-active sprites
+        if (!this.active) { return; }
+
         // save canvas context
         this.ctx.save();
 
@@ -35,11 +38,13 @@ class ImageSprite extends Sprite {
         this.ctx.scale(scaleX, 1);
 
         // draw the image to canvas
-        this.ctx.drawImage(this.image,
+        this.ctx.drawImage(
+            images[this.imageKey],
             xPosition >> 0,
             this.y >> 0,
             this.width,
-            this.height);
+            this.height
+        );
 
         // restore canvas context
         this.ctx.restore();

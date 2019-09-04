@@ -27,7 +27,6 @@ class Button extends ImageSprite {
 
         this.id = Math.random().toString(16).slice(2);
         this.meta = options.meta;
-        this.active = true;
         this.goal = options.goal || false;
         this.lane = options.lane;
         this.bounds = {
@@ -39,7 +38,7 @@ class Button extends ImageSprite {
 
     }
 
-    draw() {
+    draw(images) {
         if (this.goal) {
             // return to originalWidth
             if (this.width < this.originalWidth) {
@@ -63,7 +62,7 @@ class Button extends ImageSprite {
 
         }
 
-        super.draw();
+        super.draw(images);
     }
 
     pressed() {
@@ -76,6 +75,27 @@ class Button extends ImageSprite {
             this.x = this.x + (this.width / 16);
             this.y = this.y + (this.height / 16);
         }
+    }
+
+    recycle({ imageKey, lane, x, y }) {
+        if ([imageKey, lane, x, y].includes(undefined)) { return; } // ignore missing args
+        if (imageKey === this.imageKey) { return; } // ignore duplicates
+
+        // new imageKey
+        this.imageKey = imageKey;
+
+        // set position
+        this.setPosition(x, y)
+
+        // set lane
+        this.lane = lane;
+
+        // set to active
+        this.active = true;
+    }
+
+    suspend() {
+        this.active = false;
     }
 }
 

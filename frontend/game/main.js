@@ -88,10 +88,6 @@ class Game {
         // handle overlay clicks
         this.overlay.root.addEventListener('click', (e) => this.handleClicks(e));
 
-        // handle resize events
-        window.addEventListener('resize', () => this.handleResize());
-        window.addEventListener("orientationchange", (e) => this.handleResize(e));
-
         // restart game loop after tab unfocused
         // window.addEventListener('blur', () => this.requestFrame(() => this.play()));
 
@@ -110,6 +106,19 @@ class Game {
         this.canvas.width = Math.min(window.innerWidth, this.maxWidth); // set game screen width
         this.canvas.height = this.topbar.active ? window.innerHeight - this.topbar.clientHeight : window.innerHeight; // set game screen height
 
+        // set screen
+        this.screen = {
+            top: 0,
+            bottom: this.canvas.height,
+            left: 0,
+            right: this.canvas.width,
+            centerX: this.canvas.width / 2,
+            centerY: this.canvas.height / 2,
+            width: this.canvas.width,
+            height: this.canvas.height,
+            scale: ((this.canvas.width + this.canvas.height) / 2) * 0.003
+        };
+
         // frame count, rate, and time
         // this is just a place to keep track of frame rate (not set it)
         this.frame = {
@@ -124,6 +133,7 @@ class Game {
             .find(c => c.key === 'buttons').fields
             .map(f => {
                 return {
+                    id: Math.random().toString(16).slice(2),
                     key: f.key,
                     value: this.config.buttons[f.key],
                     type: f.type
@@ -159,18 +169,20 @@ class Game {
             }, {});
 
         let lanes = Object.keys(this.buttons).length;
+        let laneSize = Math.floor(this.canvas.width / lanes);
 
         // game settings
         this.state = {
             current: 'loading',
             prev: '',
             lanes: lanes,
-            laneSize: Math.floor(this.canvas.width / lanes),
+            laneSize: laneSize,
             gameSpeed: parseInt(this.config.settings.gameSpeed),
             score: 0,
             power: 100,
             paused: false,
             muted: localStorage.getItem(this.prefix.concat('muted')) === 'true',
+            maxButtons: Math.floor(this.screen.height / laneSize),
             keyMap: ''
         };
 
@@ -201,20 +213,6 @@ class Game {
         document.querySelector('#button').style.textShadow = `4px 4px ${this.config.colors.secondaryColor}`
         document.querySelector('#banner').style.textShadow = `4px 4px ${this.config.colors.secondaryColor}`
 
-        // set screen
-        this.screen = {
-            top: 0,
-            bottom: this.canvas.height,
-            left: 0,
-            right: this.canvas.width,
-            centerX: this.canvas.width / 2,
-            centerY: this.canvas.height / 2,
-            width: this.canvas.width,
-            height: this.canvas.height,
-            scale: ((this.canvas.width + this.canvas.height) / 2) * 0.003
-        };
-
-
         // set document body to backgroundColor
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
         this.canvas.style.backgroundColor = this.config.colors.backgroundColor;
@@ -233,7 +231,7 @@ class Game {
         const gameAssets = [
             loadImage('backgroundImage', this.config.images.backgroundImage, {
                 optional: true,
-                params: `fit=max&w=${this.screen.width}&h=${this.screen.height}auto=compress`
+                params: `fit=max&w=${this.screen.width}&h=${this.screen.height}&auto=compress`
             }),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadFont('gameFont', this.config.settings.fontFamily)
@@ -243,7 +241,7 @@ class Game {
         const buttonImages = Object.entries(this.buttons)
             .map((entry) => entry[1])
             .map((button) => loadImage(button.image.key, button.image.value, {
-                params: `fit=max&w=${this.state.laneSize}&h=${this.state.laneSize}auto=compress`
+                params: `fit=max&w=${this.state.laneSize}&h=${this.state.laneSize}&auto=compress`
             }));
 
         // put the loaded assets the respective containers
@@ -292,7 +290,7 @@ class Game {
                         imagekey: button.image.key
                     },
                     ctx: this.ctx,
-                    image: image,
+                    imageKey: button.image.key,
                     lane: button.lane,
                     x: (button.lane * this.state.laneSize) + (size.width / 8),
                     y: this.screen.bottom - size.height * 1.25,
@@ -310,7 +308,7 @@ class Game {
                     <img 
                         class="desktop-instructions-image"
                         alt="${g.meta.imagekey}"
-                        src="${g.image.src}"
+                        src="${this.images[g.meta.imagekey].src}"
                     />
                     <span class="desktop-instructions-span">
                         ${g.meta.keycode.replace(/Digit|Key/, '')}
@@ -389,33 +387,27 @@ class Game {
             }
 
             // add a button
-            if (this.frame.count % 120 === 0 || this.entities.length < 5) {
-                // pick a random lane/location
+            // if (this.frame.count % 120 === 0 || this.entities.map(e => e.active).length < 5) {
+            if (this.entities.map(e => e.active).length <= this.state.maxButtons) {
+                // pick a random lane / location
                 let button = randomProperty(this.buttons);
                 let location = { x: this.state.laneSize * button.lane, y: -200 };
+                location.valid = this.validLocation(location);
 
-                // ignore crowded locations
-                let inValidLocation = this.entities.some((ent) => {
-                    return getDistance(ent, location) < this.state.laneSize * 2;
-                });
+                let shouldAdd = this.entities.length < this.state.maxButtons;
+                let shouldRecycle = this.entities.length >= this.state.maxButtons;
 
-                if (!inValidLocation) {
-                    // add new button
-                    let image = this.images[button.image.key]
-                    let size = resize({ image: image, width: this.state.laneSize * 0.75 });
+                // add new button
+                if (location.valid && shouldAdd) {
 
-                    this.entities.push(new Button({
-                        meta: { lane: button.lane, keycode: button.keycode.value },
-                        ctx: this.ctx,
-                        image: image,
-                        lane: button.lane,
-                        x: (button.lane * this.state.laneSize) + (size.width / 8),
-                        y: location.y,
-                        width: size.width,
-                        height: size.height,
-                        speed: this.state.gameSpeed,
-                        bounds: this.screen
-                    }))
+                    this.createButton({ button: button, location: location, list: this.entities });
+                }
+
+                // recycle a button
+                if (location.valid && shouldRecycle) {
+                    let entity = this.entities.find(r => !r.active);
+
+                    this.recycleButton({ button: button, location: location, entity: entity });
                 }
             }
 
@@ -424,16 +416,16 @@ class Game {
                 const button = this.entities[i];
 
                 button.move(0, 1, this.frame.scale);
-                button.draw();
+                button.draw(this.images);
 
-                if (button.y > this.screen.bottom) {
-                    // remove off-screen buttons
-                    this.entities.splice(i, 1);
-
+                if (button.active && button.y > this.screen.bottom) {
                     // remove points from powerbar
                     this.setState({
-                        power: Math.min(this.state.power - (this.state.power / 4), 100)
+                        power: Math.min(this.state.power - (this.state.power / 8), 100)
                     })
+
+                    // flag off-screen buttons
+                    button.suspend();
                 }
 
             }
@@ -443,7 +435,7 @@ class Game {
                 const goalButton = this.goals[i];
 
                 // draw goal
-                goalButton.draw();
+                goalButton.draw(this.images);
             }
 
             // update and draw effects
@@ -502,23 +494,68 @@ class Game {
         }
     }
 
+    createButton({ button, location, list }) {
+        // get imagesize
+        let image = this.images[button.image.key]
+        let size = resize({ image: image, width: this.state.laneSize * 0.75 });
+
+        // push new button
+        list.push(new Button({
+            meta: { lane: button.lane, keycode: button.keycode.value },
+            ctx: this.ctx,
+            imageKey: button.image.key,
+            lane: button.lane,
+            x: (button.lane * this.state.laneSize) + (size.width / 8),
+            y: location.y,
+            width: size.width,
+            height: size.height,
+            speed: this.state.gameSpeed,
+            bounds: this.screen
+        }))
+    }
+
+    recycleButton({ button, location, entity }) {
+        if (!button || !location || !entity) { return; }
+
+        // get imagesize
+        let image = this.images[button.image.key]
+        let size = resize({ image: image, width: this.state.laneSize * 0.75 });
+
+        // recycle
+        entity.recycle({
+            imageKey: button.image.key,
+            lane: button.lane,
+            x: (button.lane * this.state.laneSize) + (size.width / 8),
+            y: location.y
+        });
+    }
+
+    validLocation(location) {
+        return !this.entities.some((ent) => {
+            return getDistance(ent, location) < this.state.laneSize * 2;
+        });
+    }
+
     // check hit
     checkGoalAttempt(goal) {
         // success when a goal
         // if goal is less than some distance from
         // a button of the same type
-        this.entities.filter(ent => ent.lane === goal.lane)
-        .forEach((target, index) => {
+        // .filter(ent => ent.active)
+        // .filter(ent => ent.y > this.screen.height - (ent.height * 2))
+        this.entities
+        .filter(ent => ent.lane === goal.lane)
+        .forEach((target) => {
             // within range
-            let threshold = goal.height / 2; // within threshold when within 25%
+            let threshold = goal.height * 0.75;
             let range = Math.abs(goal.y - target.y);
             let withinRange = range < threshold;
 
             // handle hits
             if (withinRange) {
 
-                // remove target
-                this.entities.splice(index, 1);
+                // suspend target
+                target.suspend();
 
                 // add score to powerbar
                 let targetScore = Math.abs((range - threshold) / threshold);
@@ -535,7 +572,7 @@ class Game {
             } else {
                 // remove points from powerbar
                 this.setState({
-                    power: Math.min(this.state.power - (this.state.power / 4), 100) // remove power
+                    power: Math.min(this.state.power - (this.state.power / 8), 100) // remove power
                 })
             }
         });
@@ -634,11 +671,6 @@ class Game {
 
             this.checkGoalAttempt(goal);
         }
-    }
-
-    handleResize() {
-
-        // document.location.reload();
     }
 
     // method:playback
@@ -776,8 +808,6 @@ class Game {
         document.removeEventListener('keyup', this.handleKeyboardInput);
         document.removeEventListener('touchstart', this.handleTap);
         this.overlay.root.removeEventListener('click', this.handleClicks);
-        window.removeEventListener('resize', this.handleResize);
-        window.removeEventListener("orientationchange", this.handleResize);
 
         // cleanup nodes
         delete this.overlay;

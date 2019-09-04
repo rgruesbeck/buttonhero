@@ -23,9 +23,10 @@ class Sprite {
         y,
         width,
         height,
-        speed,
-        direction,
-        bounds
+        speed = 1,
+        direction = 'right',
+        bounds,
+        active = true
     }) {
         // x and y
         this.x = x;
@@ -54,7 +55,7 @@ class Sprite {
         this.speed = speed || 1;
 
         // direction
-        this.direction = direction || 'right';
+        this.direction = direction;
 
         // target
         this.target = {
@@ -64,6 +65,9 @@ class Sprite {
 
         // bounds
         this.setBounds(bounds);
+
+        // active
+        this.active = active;
     }
 
     move(x, y, m) {
@@ -127,6 +131,11 @@ class Sprite {
 
         this.cy = this.y + (this.height / 2); // set center y
         this.vy = this.y - this.py; // set velocity y
+    }
+    
+    setPosition(x, y) {
+        this.setX(x);
+        this.setY(y);
     }
 
     setBounds({
